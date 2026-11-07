@@ -141,7 +141,7 @@
   tbody tr:nth-child(even){background:#fafbfd}
   tbody tr.pay{background:#eef7f0}
   .tblbox{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:10px}
-  /* 요약표 좌측 리스계약정보 틀고정(가로스크롤 시 리스ID·개시일·간주개시일 고정) */
+  /* 요약표 좌측 리스계약정보 틀고정(가로스크롤 시 리스ID·개시일·계산 개시일 고정) */
   .sumtbl .frz{position:sticky;z-index:2}
   .sumtbl .frz0{left:0}
   .sumtbl .frz1{left:84px}
@@ -166,7 +166,7 @@
 <body>
 <header>
   <div class="hdr-left">
-    <h1>K-IFRS 제1116호 리스 회계처리 계산기 <span style="font-weight:400;font-size:13px;opacity:.85">· 리스이용자 · v2026.11.06 (r6)</span></h1>
+    <h1>K-IFRS 제1116호 리스 회계처리 계산기 <span style="font-weight:400;font-size:13px;opacity:.85">· 리스이용자 · v2026.11.07 (r7)</span></h1>
     <p>계약정보 입력 → 리스부채 상각표 · 사용권자산 감가상각표 · 보증금(IFRS 9) · 결산 분개 일괄 산출 · 건설중인자산 자본화 옵션</p>
     <button class="hlpbtn" onclick="openManual()">📖 사용설명서</button>
   </div>
@@ -180,15 +180,16 @@
       <span class="dz-hint">또는 이 박스에 파일 끌어다 놓기 (i01/i02 자동인식)</span>
     </div>
     <div id="curwrap" class="htool hidden">
-      <span class="htool-lbl">i01 수정본</span>
+      <span class="htool-lbl">i01 내보내기</span>
       <div class="htool-row">
-        <button class="hbtn" onclick="dlCurrentI01()" title="화면에서 고친 값(해지일·축소·비정액 등)이 반영된 현행 i01을 내려받습니다">⬇ 수정 반영본 다운로드</button>
+        <button class="hbtn" onclick="dlCurrentI01()" title="화면에서 고친 값(해지일·축소·비정액 등)이 반영된 현행 i01을 내려받습니다">⬇ 수정 반영본</button>
+        <button class="hbtn" onclick="dlNextI01()" title="결산을 마칠 때 씁니다. 재측정을 확정한 리스는 이월 행(변경일 개시·수정조건·이월 사용권자산)으로, 나머지는 그대로 담아 다음 결산용 i01을 만듭니다">📤 차기 결산 i01 생성</button>
       </div>
     </div>
     <div class="htool">
       <span class="htool-lbl" id="sslbl">작업상태 <span style="font-weight:400;opacity:.75">(자동저장)</span></span>
       <div class="htool-row">
-        <button class="hbtn" onclick="sessionExport()" title="현재 작업(i01·i02·승격·해지·재측정)을 파일로 저장합니다">💾 저장(.json)</button>
+        <button class="hbtn" onclick="sessionExport()" title="현재 작업(i01·i02·전환·해지·재측정)을 파일로 저장합니다">💾 저장(.json)</button>
         <button class="hbtn" onclick="document.getElementById('ssfile').click()" title="저장해 둔 작업상태 파일을 불러옵니다">📂 불러오기</button>
         <button class="hbtn" onclick="sessionReset()" title="화면·자동저장을 모두 비우고 새 결산을 시작합니다" style="background:#ffe9e9;color:#8a2020">🗑 새 작업</button>
       </div>
@@ -210,10 +211,8 @@
     <div id="pickwrap" class="hidden">
       <label style="margin-top:0">불러온 계약 선택 (<span id="pickcount">0</span>건)</label>
       <select id="leasepick" onchange="pickLease(this.value)"></select>
-      <button class="ghost" style="margin-top:8px;background:#e2efda;color:#375623" onclick="dlNextI01()">📤 차기 결산 i01 생성(이월)</button>
-      <div class="note" style="margin:4px 0 0;font-size:11px">리스변경(재측정)을 modify 탭에서 <b>이월 저장</b>한 리스는 <b>재기준 행</b>(변경일 개시·수정조건·이월 사용권자산)으로, 나머지는 그대로 담아 다음 결산용 i01을 만듭니다.</div>
     </div>
-    <div class="note" style="margin:0 0 2px">※ 엑셀 일괄 입력은 <b>상단 헤더 우측</b>에서: <b>i01 양식 다운로드·업로드</b>(끌어다 놓기 가능), i01 업로드 후 <b>i02 실제납부</b> 양식·업로드가 나타납니다. 각 자산(리스)별 회차 수정은 <b>[납부차이(선납/지연)] 탭</b>에서도 가능합니다.</div>
+    <div class="note" id="xlhint" style="margin:0 0 2px">※ 엑셀 일괄 입력은 <b>상단 헤더 우측</b>에서: <b>i01 양식 다운로드·업로드</b>(끌어다 놓기 가능), i01 업로드 후 <b>i02 실제납부</b> 양식·업로드가 나타납니다. 각 자산(리스)별 회차 수정은 <b>[납부차이(선납/지연)] 탭</b>에서도 가능합니다.</div>
     <input type="file" id="xlfile" accept=".xlsx,.xls" style="display:none" onchange="uploadXL(event)">
     <input type="file" id="i02file" accept=".xlsx,.xls" style="display:none" onchange="uploadI02(event)">
 <input type="file" id="ssfile" accept=".json" style="display:none" onchange="sessionImport(event)">
@@ -228,8 +227,8 @@
     </div>
     <label>개시일 처리 방식</label>
     <select id="startmode">
-      <option value="monthly">월말 간주 (기본 · 기존 워크페이퍼 호환)</option>
-      <option value="daily">실제일 일할 (ACT/365 유효 · 월중 개시 정밀)</option>
+      <option value="monthly">월말 기준 (기본 · 기존 워크페이퍼 호환)</option>
+      <option value="daily">실제일 일할 (연 365일 · 월중 개시 정밀)</option>
     </select>
     <label>결산일 (검증·BS 기준, 공란=개시연도 말일)</label>
     <span class="datew"><input id="asof" class="dm" type="text" inputmode="numeric" maxlength="10" placeholder="YYYY-MM-DD"><input type="date" class="dmpick" tabindex="-1" aria-label="달력에서 결산일 선택"></span>
@@ -291,7 +290,7 @@
 
     <h3>건설중인자산 자본화 <span style="text-transform:none;color:#b26a00;font-weight:600">· 선택(건설단계 전용)</span></h3>
     <div class="note" style="margin:0 0 4px">일반 리스는 체크하지 않고 사용하세요(기본 = 표준 리스이용자 처리, 감가상각비·이자비용 당기손익). 임차물이 적격자산 건설에 직접 사용될 때만 자본화를 선택합니다.</div>
-    <div class="chk"><input type="checkbox" id="prorate"><label>월중 이벤트 일할 안분 (해지·축소·재측정이 월중일 때 그 달을 경과일수로 안분 · M-3)</label></div>
+    <div class="chk"><input type="checkbox" id="prorate"><label>월중 이벤트 일할 안분 (해지·축소·재측정이 월중일 때 그 달을 경과일수로 안분)</label></div>
     <div class="chk"><input type="checkbox" id="cap_dep"><label>감가상각비 → 건설중인자산 (1016.48·49)</label></div>
     <div class="chk"><input type="checkbox" id="cap_int"><label>리스이자 → 건설중인자산 (1023.6⑷, 직접귀속 시)</label></div>
     <label>자본화 종료월(준공, 공란=전 기간)</label><input id="cutoff" type="number" placeholder="예: 준공까지 개월수">
@@ -355,7 +354,7 @@ function styleMasterGroups(ws,r){
   ws['!merges']=(ws['!merges']||[]).concat(MASTER_GROUPS.filter(g=>g.c1>g.c0).map(g=>({s:{r,c:g.c0},e:{r,c:g.c1}})));
 }
 let LEASES=[], PICKED=null;   // PICKED: 현재 폼에 로드된 LEASES 인덱스 (폼 수정 역반영용)
-// 비정액 계약 리스료 벡터 - 리스ID → {회차:금액}. i01의 '리스료스케줄' 시트 또는 i02 승격으로 채워진다.
+// 비정액 계약 리스료 벡터 - 리스ID → {회차:금액}. i01의 '리스료스케줄' 시트 또는 i02 전환으로 채워진다.
 // 비어 있으면 전 회차 정기리스료(정액) = 기존 동작.
 let PMTS={};
 // 보증금 변동 - 리스ID → [{date:'YYYY-MM-DD', amt}]. i01의 '보증금변동' 시트에서 채워진다.
@@ -444,7 +443,7 @@ function depRowsAll(){ const out=[];
   Object.keys(DEPS||{}).forEach(id=>(DEPS[id]||[]).forEach(m=>out.push([id,m.date,R(m.amt)])));
   return out.sort((a,b)=> a[0]<b[0]?-1:(a[0]>b[0]?1:(a[1]<b[1]?-1:1))); }
 // 현행 i01 다시 내려받기 - 화면에서 고친 값(해지일·정산금·축소일·비율·계약 항목)과 비정액 벡터를 그대로 반영.
-// 차기 이월(dlNextI01)과 달리 재기준·해지 제외를 하지 않는다 = "지금 이 상태의 i01".
+// 차기 이월(dlNextI01)과 달리 이월·해지 제외를 하지 않는다 = "지금 이 상태의 i01".
 function dlCurrentI01(){
   if(typeof XLSX==='undefined'){alert('엑셀 모듈 로드 실패');return;}
   if(typeof syncPicked==='function') syncPicked();   // 폼 수정값 먼저 반영
@@ -472,7 +471,7 @@ function dlCurrentI01(){
   const nEnd=src.filter(L=>L.end_date).length, nRed=src.filter(L=>L.red_date&&+L.red_pct>0).length;
   alert('i01 수정 반영본 다운로드 - 전체 '+rows.length+'건'+(nEnd?' · 중도해지 '+nEnd+'건':'')+(nRed?' · 범위축소 '+nRed+'건':'')+(pmtRows.length?' · 비정액 리스료스케줄 '+pmtRows.length+'행':'')+'.');
 }
-// ===== 차기 결산용 i01 생성(이월) - 변경없는 리스는 그대로, 재측정 저장(MODS)된 리스는 재기준 행 =====
+// ===== 차기 결산용 i01 생성(이월) - 변경없는 리스는 그대로, 재측정 저장(MODS)된 리스는 이월 행 =====
 function nextI01RawRow(L){ const num=v=>parseFloat(String(v==null?'':v).replace(/,/g,''))||0;
   return [L.lease_id||'', L.commencement||'', L.term||'', (L.rate!==''&&L.rate!=null?num(L.rate)/100:''), num(L.payment)||'',
     L.freq||'월', L.timing||'후급', num(L.prepaid)||0, num(L.incentive)||0, num(L.idc)||0, num(L.restore)||0,
@@ -485,8 +484,8 @@ function dlNextI01(){
   const num=v=>parseFloat(String(v==null?'':v).replace(/,/g,''))||0;
   const savedMOD=MOD, savedKEY=MOD_KEY;   // 전역 MOD 백업(루프서 임시 사용)
   const rows=[], warns=[]; let nRebase=0;
-  const depDropCnt=new Map();   // 재기준 행에 합산된 보증금 변동행 키(id\u0001변동일\u0001금액) → 건수. 차기 시트 제외용(R2)
-  let nEnd=0; const pmtRows=[];   // 비정액 계약(승격·재측정 비정액) → '리스료스케줄' 시트로 이월
+  const depDropCnt=new Map();   // 이월 행에 합산된 보증금 변동행 키(id\u0001변동일\u0001금액) → 건수. 차기 시트 제외용(R2)
+  let nEnd=0; const pmtRows=[];   // 비정액 계약(전환·재측정 비정액) → '리스료스케줄' 시트로 이월
   LEASES.forEach(L=>{
     const I=leaseToI(L);
     if(!(I.cy&&I.term>0&&I.payment>0)){ rows.push(nextI01RawRow(L)); return; }
@@ -502,36 +501,36 @@ function dlNextI01(){
       const pmt=(mod.newPmts&&mod.newPmts.length)?mod.newPmts[0]:mod.newPmt;
       if(!uniform){ mod.newPmts.forEach((v,j)=>pmtRows.push([I.id, j+1, R(v)]));   // 비정액 잔여지급 → 리스료스케줄 시트에 정확히 이월(근사 아님)
         warns.push('「'+(I.id||'')+'」 변경후 지급액이 비정액 → 리스료스케줄 시트에 회차별 금액으로 이월(정기리스료 칸은 대표값)'); }
-      // 보증금: 재기준(개시=변경일)이므로 반환월수를 '잔여'로 조정 → 현재 장부(액면/(1+율)^잔여) 정확 재현. 액면·율 무변동 가정.
+      // 보증금: 이월(개시=변경일)이므로 반환월수를 '잔여'로 조정 → 현재 장부(액면/(1+율)^잔여) 정확 재현. 액면·율 무변동 가정.
       let depFaceOut='', depRateOut='', depNOut='';
       if(I.depFace>0){
         const elapsed=M.k;   // 변경일까지 경과 회차(스케줄 기준) - 월경계 계산보다 정확
         const remN=(I.depN||I.term)-elapsed;
         // 액면은 '변경유효일까지 반영된 기중 변동'을 합산한다 - 원액면(I.depFace)만 내보내면 증액+재측정 계약의
         // 증액분 금융자산이 차기 결산에서 통째로 사라진다(코워크 검증 F7, 2026-07-28). 변경유효일 이후 변동행은
-        // 보증금변동 시트로 그대로 이월되어 재기준 계약에서 다시 반영되므로 여기 합산하면 이중계상이다.
+        // 보증금변동 시트로 그대로 이월되어 이월 계약에서 다시 반영되므로 여기 합산하면 이중계상이다.
         const mvApplied=(res.depMoveList||[]).filter(mv=>mv.t<=M.k);
         const faceAt=I.depFace+mvApplied.reduce((s,mv)=>s+mv.amt,0);
         // 보증금이자율이 공란이면 원 리스율을 '명시'해서 내보낸다 - 공란 그대로 두면 차기 compute의 폴백이
-        // 재기준 행의 리스율(=수정할인율)을 집어 보증금 장부가 손익 없이 튄다(코워크 E1, 2026-07-28. 4.5% 재측정 시 −287,300).
+        // 이월 행의 리스율(=수정할인율)을 집어 보증금 장부가 손익 없이 튄다(코워크 E1, 2026-07-28. 4.5% 재측정 시 −287,300).
         const depRateCarry=(L.dep_rate!==''&&L.dep_rate!=null)?num(L.dep_rate)/100:(num(L.rate)?num(L.rate)/100:'');
         if(remN>0){ depFaceOut=faceAt; depRateOut=depRateCarry; depNOut=remN;
           // 실제 반영된 변동만 차기 시트에서 제외할 수 있게 키를 등록한다(코워크 R2) - MODS 존재만으로 지우면
-          // 재기준 행이 안 만들어진 경로(계산 미비·일할 모드·액면 공란·가드 거부)에서 변동 원본이 영구 소실된다.
+          // 이월 행이 안 만들어진 경로(계산 미비·일할 모드·액면 공란·가드 거부)에서 변동 원본이 영구 소실된다.
           mvApplied.forEach(mv=>{ const _k=String(I.id)+'\u0001'+String(mv.input)+'\u0001'+R(mv.amt); depDropCnt.set(_k,(depDropCnt.get(_k)||0)+1); });
           warns.push('「'+(I.id||'')+'」 보증금 이월: 반환 잔여 '+remN+'개월'+(mvApplied.length?(' · 기중 변동 '+mvApplied.length+'건 합산 액면 '+won(faceAt)):'')+((L.dep_rate===''||L.dep_rate==null)&&depRateCarry!==''?(' · 보증금이자율 '+(depRateCarry*100).toFixed(2).replace(/\.?0+$/,'')+'% 명시(원 리스율 - 공란이면 수정할인율이 잘못 적용됨)'):'')+'(원반환일 무변동 가정). 연장에 따라 반환일이 함께 연장되거나 보증금액이 바뀌면 생성된 i01의 보증금 셀을 수정하세요.'); }
         else warns.push('「'+(I.id||'')+'」 보증금 반환기간 종료 → 보증금 제외(확인 필요). 보증금 변동 행은 삭제하지 않았습니다 - 직접 확인하세요.');
       }
       rows.push([I.id, mod.mdate, mod.remMonths, mod.newRate/100, R(pmt), L.freq||'월', L.timing||'후급',
         0,0,0,0, mod.remMonths, (I.transfer?'Y':'N'), I.conv||'nominal',
-        depFaceOut, depRateOut, depNOut, R(M.newRou), '', '', '', '', '']);   // 마지막 ''=축소 수정할인율(23열) - 재기준 계약은 축소 이력을 승계하지 않는다
+        depFaceOut, depRateOut, depNOut, R(M.newRou), '', '', '', '', '']);   // 마지막 ''=축소 수정할인율(23열) - 이월 계약은 축소 이력을 승계하지 않는다
       nRebase++;
     } else { rows.push(nextI01RawRow(L));
-      if(PMTS[L.lease_id]) Object.keys(PMTS[L.lease_id]).forEach(k=>pmtRows.push([L.lease_id, parseInt(k), R(PMTS[L.lease_id][k])]));   // 승격된 비정액 계약 유지
+      if(PMTS[L.lease_id]) Object.keys(PMTS[L.lease_id]).forEach(k=>pmtRows.push([L.lease_id, parseInt(k), R(PMTS[L.lease_id][k])]));   // 전환된 비정액 계약 유지
     }
   });
   MOD=savedMOD; MOD_KEY=savedKEY;
-  const aoa=[["K-IFRS 제1116호 리스 - 차기 결산용 i01 (이월 반영: 재측정 재기준 "+nRebase+"건 · 중도해지 제외 "+nEnd+"건). 검토 후 다음 결산에 그대로 업로드하세요."],masterGroupRow(),MASTER_COLS].concat(rows);
+  const aoa=[["K-IFRS 제1116호 리스 - 차기 결산용 i01 (이월 반영: 재측정 이월 "+nRebase+"건 · 중도해지 제외 "+nEnd+"건). 검토 후 다음 결산에 그대로 업로드하세요."],masterGroupRow(),MASTER_COLS].concat(rows);
   const area=appendNewRowArea(aoa);
   const ws=XLSX.utils.aoa_to_sheet(aoa);
   const moneyCols=[2,4,7,8,9,10,14,17,19], pctCols=[3,15,22];
@@ -545,19 +544,19 @@ function dlNextI01(){
   styleNewRowArea(ws, area);
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"마스터");
   XLSX.utils.book_append_sheet(wb, pmtSheet(pmtRows), "리스료스케줄");
-  // 재기준 행 액면(faceAt)에 실제 합산된 변동행만 차기 i01에서 제외한다(코워크 R2 - 종전 'MODS 존재+날짜' 기준은
-  // 재기준이 실제로 안 된 계약의 변동 원본까지 지웠다). depDropCnt는 위 재기준 분기에서 mvApplied로 채워진다.
+  // 이월 행 액면(faceAt)에 실제 합산된 변동행만 차기 i01에서 제외한다(코워크 R2 - 종전 'MODS 존재+날짜' 기준은
+  // 이월이 실제로 안 된 계약의 변동 원본까지 지웠다). depDropCnt는 위 이월 분기에서 mvApplied로 채워진다.
   const dropDep=[];
   const depCarry=depRowsAll().filter(rw=>{
     const _k=String(rw[0])+'\u0001'+String(rw[1])+'\u0001'+R(rw[2]);
     const c=depDropCnt.get(_k)||0;
     if(c>0){ depDropCnt.set(_k,c-1); dropDep.push(String(rw[0])); return false; }
     return true; });
-  if(dropDep.length) warns.push('보증금 변동 '+dropDep.length+'건은 변경유효일까지 반영분으로 재기준 행 액면에 합산되어 차기 i01의 보증금변동 시트에서 제외: '+[...new Set(dropDep)].join(', '));
+  if(dropDep.length) warns.push('보증금 변동 '+dropDep.length+'건은 변경유효일까지 반영분으로 이월 행 액면에 합산되어 차기 i01의 보증금변동 시트에서 제외: '+[...new Set(dropDep)].join(', '));
   XLSX.utils.book_append_sheet(wb, depSheet(depCarry), "보증금변동");
   const buf=new Uint8Array(XLSX.write(wb,{type:'array',bookType:'xlsx'}));
   dlBlob(freezeInject(buf,[{y:3,x:7},{y:2}]), "i01 차기결산(이월).xlsx");   // 마스터=H4 틀고정
-  alert('차기 결산용 i01 생성 완료 - 전체 '+rows.length+'건, 재측정 재기준 '+nRebase+'건(이월 사용권자산 컬럼 채움)'+(nEnd?', 중도해지 제외 '+nEnd+'건':'')+(pmtRows.length?', 비정액 리스료스케줄 '+pmtRows.length+'행':'')+'.'+(warns.length?'\n\n[확인 필요]\n· '+warns.join('\n· '):''));
+  alert('차기 결산용 i01 생성 완료 - 전체 '+rows.length+'건, 재측정 이월 '+nRebase+'건(이월 사용권자산 컬럼 채움)'+(nEnd?', 중도해지 제외 '+nEnd+'건':'')+(pmtRows.length?', 비정액 리스료스케줄 '+pmtRows.length+'행':'')+'.'+(warns.length?'\n\n[확인 필요]\n· '+warns.join('\n· '):''));
 }
 // 헤더행/열 틀고정 주입(SheetJS 미지원 → fflate 후처리). ySplits: 숫자|{y,x} 또는 시트순 배열
 function colLetterX(n){ let x='',m=n+1; while(m>0){ const q=(m-1)%26; x=String.fromCharCode(65+q)+x; m=(m-q-1)/26; } return x; }
@@ -620,9 +619,9 @@ function dlXLSX(){
   const spread=arr=>{const r=[];arr.forEach((v,i)=>r[2*i]=v);return r;};
   const setz=(ws,r,c,z)=>{const ad=XLSX.utils.encode_cell({r,c}); if(ws[ad]&&ws[ad].t==='n') ws[ad].z=z;};
   // ===== 요약 (배치 _fm_summary 24열) =====
-  const S=summaryData(asof), P4=['사용권자산상각비','현할차상각비','이자비용','이자수익'];
-  const grp=[]; grp[3]='개시일 계정값'; grp[6]='결산일 현재 BS'; grp[12]='PL · 당월'; grp[16]='PL · 당분기(3개월)'; grp[20]='PL · 당기누적(YTD)';
-  const cols3=['리스ID','리스개시일','간주개시일','사용권자산(최초원가)','리스부채(최초)','보증금현할차','사용권자산(장부금액)','상각누계액','리스부채(유동)','리스부채(비유동)','리스부채 합계','보증금(금융자산)'].concat(P4,P4,P4);
+  const S=summaryData(asof), P4=['사용권자산상각비','현재가치할인차금 상각비','이자비용','이자수익'];
+  const grp=[]; grp[3]='개시일 계정값'; grp[6]='결산일 현재 BS'; grp[12]='PL · 당월'; grp[16]='PL · 당분기(3개월)'; grp[20]='PL · 당기누적';
+  const cols3=['리스ID','리스개시일','계산 개시일','사용권자산(최초원가)','리스부채(최초)','보증금 현재가치할인차금','사용권자산(장부금액)','상각누계액','리스부채(유동)','리스부채(비유동)','리스부채 합계','보증금(금융자산)'].concat(P4,P4,P4);
   const saoa=[['결산일(고정·값) →',fmtD(asof)],grp,cols3];
   S.rows.forEach(x=> saoa.push([x.id,fmtD(x.comm),fmtD(x.deemed)].concat(x.nums)));
   saoa.push(['합계','',''].concat(S.totals));
@@ -638,7 +637,7 @@ function dlXLSX(){
   for(let r=3;r<3+_nR;r++) for(let c=0;c<24;c++) stC(ws0,r,c, c===0?B_TXT:(c<3?B_CTR:B_NUM));
   for(let c=0;c<24;c++) stC(ws0,3+_nR,c, c<3?B_TOT:B_TOTN);
   XLSX.utils.book_append_sheet(wb,ws0,'요약');
-  // ===== 최종(조정 후) - 계약상 + i02 조정 + 재측정 조정 (공시용, 코드리뷰 A4) =====
+  // ===== 최종(조정 후) - 계약상 + 실제 납부 조정 + 재측정 조정 (공시용, 코드리뷰 A4) =====
   const FR=finalRollup(asof); let hasFinalSheet=false;
   if(FR.n && (FR.nI02||FR.nMod)){
     const T=FR.tot, L=[['리스부채 합계','liab'],['  ㄴ유동','cur'],['  ㄴ비유동','noncur'],
@@ -655,17 +654,17 @@ function dlXLSX(){
     if(_ov.length) wrows.push(['⚠ 재측정과 해지·축소가 겹친 계약은 도구가 계산하지 못해 금액이 맞지 않을 수 있습니다: '+_ov.join(', ')]);
     if(_st.length) wrows.push(['⚠ 재측정 저장 뒤 계약 조건이 바뀐 계약은 다시 확정하세요: '+_st.join(', ')]);
     if(wrows.length) wrows.push([]);
-    const faoa=[['최종 공시 금액 = 계약상(i01 본문) + i02 조정 + 재측정 조정',fmtD(asof)]].concat(wrows).concat([
-      ['항목','계약상(i01)','+ i02 조정','+ 재측정 조정','최종'],
+    const faoa=[['최종 공시 금액 = 계약상 + 실제 납부 조정 + 재측정 조정',fmtD(asof)]].concat(wrows).concat([
+      ['항목','계약상','+ 실제 납부 조정','+ 재측정 조정','최종'],
       ['[재무상태표] 결산일 현재']]).concat(L.map(line))
       .concat([['[손익] 당기 '+fmtD(FR.fy)+' 다음날 ~ '+fmtD(asof)]]).concat(PL.map(line));
     const hdr1=1+wrows.length, hdr2=faoa.length+1;
     faoa.push([],['계약별 조정 내역 ('+FR.rows.length+'건 - 조정이 있는 계약만)'],
-      ['리스ID','계약상 부채','+ i02','+ 재측정','최종 부채','최종 사용권자산','당기 이자비용','당기 감가상각비']);
+      ['리스ID','계약상 부채','+ 실제 납부','+ 재측정','최종 부채','최종 사용권자산','당기 이자비용','당기 감가상각비']);
     FR.rows.forEach(r=>faoa.push([r.id,R(r.C.liab),R(r.P.liab),R(r.M.liab),R(r.C.liab+r.P.liab+r.M.liab),
       R(r.C.rou+r.P.rou+r.M.rou),R(r.C.intr+r.P.intr+r.M.intr),R(r.C.dep+r.P.dep+r.M.dep)]));
     faoa.push([],['※ 해지·범위축소는 스케줄이 잘려 계약상 열에 이미 반영. 손익 조정은 결산일 누적 − 전기말 누적(당기분).'],
-      ['※ 요약 시트·계약별 시트는 계약상(i01) 기준입니다.']);
+      ['※ 요약 시트·계약별 시트는 계약상 기준입니다.']);
     const wsF=XLSX.utils.aoa_to_sheet(faoa);
     wsF['!cols']=[{wch:26},{wch:16},{wch:15},{wch:16},{wch:16},{wch:17},{wch:15},{wch:16}];
     fmtZ(wsF, [1,2,3,4,5,6,7], 1);
@@ -688,10 +687,10 @@ function dlXLSX(){
     const depm=(I.transfer&&I.ul)?I.ul:Math.min(I.ul||I.term,I.term), pmt0=(I.timing==='선급')?pmtVec(I)[0]:0;   // 비정액 선급은 1회차가 대표값과 다르다(A-1)
     const inL=['리스개시일','리스기간(개월)','연할인율','정기리스료','지급주기','지급시점','선급리스료','리스인센티브','리스개설직접원가','복구원가추정치'];
     const inV=[fmtD(comm),I.term,rr,I.payment,I.freq,I.timing,I.prepaid,I.incentive,I.idc,I.restore];
-    const drL=['간주개시일','월이자율','지급주기(개월)','상각월수','보증금월이자율','보증금반환월','지급횟수','기간이자율','리스부채(최초)','보증금현재가치'];
+    const drL=['계산 개시일','월이자율','지급주기(개월)','상각월수','보증금월이자율','보증금반환월','지급횟수','기간이자율','리스부채(최초)','보증금현재가치'];
     const drV=[fmtD(res.deemed),mrate,mpp,depm,(dep?dmr:''),(dep?I.depN:''),npay,rp,res.liability,res.depPV];
     const gh=[]; gh[2]='── 리스부채 ──'; gh[7]='── 사용권자산 ──'; if(dep) gh[13]='── 보증금(금융자산) ──';
-    const th=['경과월','결산기준일(월말)','부채 기초','이자비용','리스료지급','부채 기말','','자산 기초','감가상각비','현할차상각비','자산 기말','상각누계액','','보증금 기초','이자수익','보증금 기말'];
+    const th=['경과월','결산기준일(월말)','부채 기초','이자비용','리스료지급','부채 기말','','자산 기초','감가상각비','현재가치할인차금 상각비','자산 기말','상각누계액','','보증금 기초','이자수익','보증금 기말'];
     const a=[[`[${I.id||''}] 월별 리스 스케줄 (입력값 기반 자동 계산 · 값)`],['■ 리스 입력값'],spread(inL),spread(inV),['■ 파생 계산값'],spread(drL),spread(drV),[],gh,th];
     a.push([0,fmtD(res.deemed),res.liability,0,pmt0,res.liability-pmt0,'',res.rou,0,0,res.rou,0,'',(dep?res.depPV:''),(dep?0:''),(dep?res.depPV:'')]);
     res.rows.forEach(x=> a.push([x.t,fmtD(x.as_of),R(x.lo),R(x.intr),R(x.pay),R(x.lc),'',R(x.ro),R(x.dep-(x.ddiff||0)),R(x.ddiff||0),R(x.rc),R(x.accum),'',(dep?R(x.dopen):''),(dep?R(x.inc):''),(dep?R(x.dcls):'')]));
@@ -711,9 +710,9 @@ function dlXLSX(){
     XLSX.utils.book_append_sheet(wb,ws,nm);
     journal(res).forEach(j=>jeAll.push([I.id||'','기본',j[0],j[1],j[2],j[3]||'',j[4],j[5]||'']));
   });
-  // ===== 조정분개 - 계약상(i01) 분개만 실으면 [최종 공시 부채]와 차이가 나는데 그 차이의 분개가 산출물 어디에도 없다.
-  // 화면 [결산 분개장]의 i02 조정·재측정 수정분개를 같은 시트에 [구분] 열로 나눠 싣는다(finalRollup의 P·M 레이어와 같은 원천).
-  // 승격(비정액)은 계약상 스케줄 자체가 바뀌어 [기본]에 이미 들어 있으므로 싣지 않는다(이중계상 방지).
+  // ===== 조정분개 - 계약상 분개만 실으면 [최종 공시 부채]와 차이가 나는데 그 차이의 분개가 산출물 어디에도 없다.
+  // 화면 [결산 분개장]의 실제 납부 조정·재측정 수정분개를 같은 시트에 [구분] 열로 나눠 싣는다(finalRollup의 P·M 레이어와 같은 원천).
+  // 전환(비정액)은 계약상 스케줄 자체가 바뀌어 [기본]에 이미 들어 있으므로 싣지 않는다(이중계상 방지).
   {
     const fyp=fyPrevEnd(asof), hasI02x=!!(I02&&Object.keys(I02).length);
     const pushJE=(id,gb,dt,memo,je)=>je.forEach(([acct,v])=>{
@@ -724,8 +723,8 @@ function dlXLSX(){
       if(hasI02x){ try{
         const pays=leaseActualPays(I), aN=pdAdjustment(I,pays,asof), aP=pdAdjustment(I,pays,fyp);
         const cur={}; for(const k in aN) cur[k]=aN[k]-aP[k];
-        pushJE(id,'i02조정(당기)',fmtD(asof),'i02 실제납부 반영 조정 - 당기',journalLines(cur));
-        pushJE(id,'i02조정(전기)',fmtD(fyp),'i02 실제납부 반영 조정 - 전기 누적(참고)',journalLines(aP));
+        pushJE(id,'실제납부조정(당기)',fmtD(asof),'i02 실제납부 반영 조정 - 당기',journalLines(cur));
+        pushJE(id,'실제납부조정(전기)',fmtD(fyp),'i02 실제납부 반영 조정 - 전기 누적(참고)',journalLines(aP));
       }catch(e){} }
       if(MODS[id]){ try{
         const mN=modAdjustment(I,asof), mP=modAdjustment(I,fyp);
@@ -747,7 +746,7 @@ function dlXLSX(){
   // 워크북 어디에도 그 설정이 없으면 두 파일을 구분할 수 없으므로 첫 시트에 기록한다.
   {
     const G=id=>document.getElementById(id), gv=id=>{const e=G(id);return e?e.value:'';};
-    const sm=(gv('startmode')==='daily')?'실제일 일할 (ACT/365)':'월말 간주 (월할)';
+    const sm=(gv('startmode')==='daily')?'실제일 일할 (연 365일)':'월말 기준 (월할)';
     const pr=prorateOn()?'ON':'OFF';
     const modIds=Object.keys(MODS||{}), pmtIds=Object.keys(PMTS||{}), ovrIds=Object.keys(OVR||{}), shIds=Object.keys(SHORT||{});
     const shLab={rou:'감면 → 사용권자산 차감',pl:'감면 → 즉시 손익',unpaid:'연체·미납(부채 유지)'};
@@ -762,28 +761,28 @@ function dlXLSX(){
     const aoa=[['전제·가정 - 이 파일을 만든 설정 (같은 입력이라도 아래가 다르면 금액이 달라집니다)'],
       ['항목','값','비고'],
       ['결산일',fmtD(asof),'화면 [결산일] 입력값'],
-      ['개시일 처리방식',sm,'월중 개시 계약의 이자·상각 기준(월말 간주 ↔ 일할)'],
-      ['월중 이벤트 일할 안분(M-3)',pr,'해지·축소·재측정이 월중일 때 그 달을 경과일수로 안분할지 - ON/OFF로 금액·해지손익 부호가 달라집니다'],
-      ['회계연도 개시월',fyStartMonth()+'월','당기누적(YTD) 손익의 기산점'],
+      ['개시일 처리방식',sm,'월중 개시 계약의 이자·상각 기준(월말 기준 ↔ 일할)'],
+      ['월중 이벤트 일할 안분',pr,'해지·축소·재측정이 월중일 때 그 달을 경과일수로 안분할지 - ON/OFF로 금액·해지손익 부호가 달라집니다'],
+      ['회계연도 개시월',fyStartMonth()+'월','당기누적 손익의 기산점'],
       ['총액 미달 처리모드(기본)','연체·미납(부채 유지)','계약별 지정이 없는 계약에 적용'],
       ['총액 미달 처리모드(계약별)',shIds.length+'건',shTxt],
       ['재측정 확정(최종 금액에 반영)',modIds.length+'건',modIds.join(', ')||'없음'],
       ['재측정 미확정(반영 안 됨)',pend.length+'건',pend.length?('⚠ '+pend.join(', ')+' - 확정 전이라 [최종(조정 후)] 시트는 최종이 아닙니다'):'없음'],
-      ['비정액 승격(회차별 리스료)',pmtIds.length+'건',pmtIds.join(', ')||'없음'],
+      ['비정액 전환(회차별 리스료)',pmtIds.length+'건',pmtIds.join(', ')||'없음'],
       ['유형 수동 지정(자동 판별 무시)',ovrIds.length+'건',ovrIds.map(k=>k+'→'+OVR[k]).join(', ')||'없음'],
       ['자본화 옵션',capTxt,'자본화 종료월: '+cutTxt],
-      ['i02(납부내역) 업로드',(I02&&Object.keys(I02).length)?(Object.keys(I02).length+'개 리스ID'):'없음','없으면 계약상(i01) 금액이 곧 최종'],
+      ['실제 납부(i02) 업로드',(I02&&Object.keys(I02).length)?(Object.keys(I02).length+'개 리스ID'):'없음','없으면 계약상 금액이 곧 최종'],
       ['계약 건수(읽은 행 / 계산 대상)',nAll+' / '+nUse,(nAll-nUse>0)?('⚠ '+(nAll-nUse)+'건은 입력 미비로 계산에서 제외'):'전부 계산'],
       ['입력 검증 경고',IW.length+'건',IW.length?IW.map(w=>String(w.t).replace(/<[^>]+>/g,'')).join(' / '):'없음'],
-      ['보증금 기중 변동','입력 '+depMvN+'건',depMvN?"변동월 말일 인식(월중 안분 없음) · 개시 시점 보증금이자율로 할인(IFRS 9 원칙은 취득시점 시장이자율 - 단순화 전제) · 현할차는 그 시점 사용권자산 가산 후 잔여 상각기간 배분(잔여 없으면 즉시 인식) · 일할 모드 미반영. 미반영 건은 입력 검증 경고·계약별 안내에 표시됩니다":'없음'],
-      ['실제 지급(i02) 이자 처리','계약 할인율 유지',"이자비용은 계약 스케줄 그대로, 리스부채만 계약 지급 누계 - 실제 지급 누계로 조정(미지급 +, 선납 -, 할인 없음). 초과분의 사용권자산 가산과 미달 처리(연체·감면)는 별도. 계약상 12개월 안에 도래하는 미지급분은 유동"],
-      ['실제 지급(i02) 적용 범위','순수 일정 변동',"지연, 밀린 금액 지급, 선납에 씀. 연체이자·기한이익 상실·사실상 합의는 벗어난 사건으로 사건별 판단. 기한이익 상실은 계약 조항의 작동이어서 리스변경이 아니고 유동 분류와 리스기간 재평가를 먼저 봄"],
-      ['실제 지급(i02) 미납 전제','지연손해금 미계산',"도구 금액은 문단 37 이자가 없다는 뜻이고 지연손해금을 계산하지 않음. 약정 연체이자 조항이 있으면 경과분을 발생 기간 비용과 부채로 수기 인식함(리스변경 아님, 사용권자산 조정 없음)"],
-      ['실제 지급(i02) 선납 전제','간편 처리',"현재 계산은 선납을 합쳐 줄이는 간편 처리임. 지정·충당으로 후속 회차가 소멸했으면 제1109호 문단 3.3.1·3.3.3에 따라 할인 차액이 그날 손익임. 리스제공자가 충당 없이 보유하면 스케줄 유지와 선급 총액 표시임. 금액이 크면 원장을 확인함"],
-      ['실제 지급(i02) 연체이자 입력','i02에서 제외',"i02 지급액에는 리스료만 넣음. 원래 계약 조항이나 법령에 따른 연체이자·지연손해금은 리스변경이 아니므로 발생 기간 비용으로 수기 처리함. 당사자가 합의해 리스료를 증액한 경우만 재측정(리스변경)으로 처리함"],
-      ['실제 지급(i02) 사용 제한','금액이 큰 리스',"다음 경우 그대로 쓰지 않음. 1) 계약서의 연체이자·기한이익 조항과 리스제공자 원장을 보기 전 2) 약정 연체이자가 있는데 경과분을 계상하지 않은 상태 3) 기한이익 상실이 발동했거나 해지 통지가 있는 경우(남은 부채 전체의 유동 분류를 먼저 보고, 도구는 이를 계산하지 않음) 4) 장기 미납에 리스제공자의 무청구·회신·반복 수용이 겹쳐 합의 여부가 먼저인 경우 5) 큰 선납의 소멸 여부를 확인하지 않은 경우 6) 지급 일정이나 충당 지정을 손익 조정에 쓰는 경우"],
-      ['실제 지급(i02) 특수 케이스','도구 밖',"연체이자의 계정 구분, 청구·면제 없는 법정 손해금의 인식, 문단 37 해석 위험은 도구 밖의 특수 케이스임. 해당 건이 생기면 별도 검토함"],
-      ['실제 지급(i02) 근거','판단',"찾은 범위에서 합의 없는 미납을 직접 다룬 공개 자료는 회계법인(BDO) 의견뿐이고 위약금·이자가 없는 경우를 전제함. 기준서가 직접 정한 방식이 아닌 판단임(문단 36·37)"],
+      ['보증금 기중 변동','입력 '+depMvN+'건',depMvN?"변동월 말일 인식(월중 안분 없음) · 개시 시점 보증금이자율로 할인(IFRS 9 원칙은 취득시점 시장이자율 - 단순화 전제) · 현재가치할인차금는 그 시점 사용권자산 가산 후 잔여 상각기간 배분(잔여 없으면 즉시 인식) · 일할 모드 미반영. 미반영 건은 입력 검증 경고·계약별 안내에 표시됩니다":'없음'],
+      ['실제 납부 이자 처리','계약 할인율 유지',"이자비용은 계약 스케줄 그대로, 리스부채만 계약 지급 누계 - 실제 지급 누계로 조정(미지급 +, 선납 -, 할인 없음). 초과분의 사용권자산 가산과 미달 처리(연체·감면)는 별도. 계약상 12개월 안에 도래하는 미지급분은 유동"],
+      ['실제 납부 적용 범위','순수 일정 변동',"지연, 밀린 금액 지급, 선납에 씀. 연체이자·기한이익 상실·사실상 합의는 벗어난 사건으로 사건별 판단. 기한이익 상실은 계약 조항의 작동이어서 리스변경이 아니고 유동 분류와 리스기간 재평가를 먼저 봄"],
+      ['실제 납부 미납 전제','지연손해금 미계산',"도구 금액은 문단 37 이자가 없다는 뜻이고 지연손해금을 계산하지 않음. 약정 연체이자 조항이 있으면 경과분을 발생 기간 비용과 부채로 수기 인식함(리스변경 아님, 사용권자산 조정 없음)"],
+      ['실제 납부 선납 전제','간편 처리',"현재 계산은 선납을 합쳐 줄이는 간편 처리임. 지정·충당으로 후속 회차가 소멸했으면 제1109호 문단 3.3.1·3.3.3에 따라 할인 차액이 그날 손익임. 리스제공자가 충당 없이 보유하면 스케줄 유지와 선급 총액 표시임. 금액이 크면 원장을 확인함"],
+      ['실제 납부 연체이자 입력','i02에서 제외',"i02 지급액에는 리스료만 넣음. 원래 계약 조항이나 법령에 따른 연체이자·지연손해금은 리스변경이 아니므로 발생 기간 비용으로 수기 처리함. 당사자가 합의해 리스료를 증액한 경우만 재측정(리스변경)으로 처리함"],
+      ['실제 납부 사용 제한','금액이 큰 리스',"다음 경우 그대로 쓰지 않음. 1) 계약서의 연체이자·기한이익 조항과 리스제공자 원장을 보기 전 2) 약정 연체이자가 있는데 경과분을 계상하지 않은 상태 3) 기한이익 상실이 발동했거나 해지 통지가 있는 경우(남은 부채 전체의 유동 분류를 먼저 보고, 도구는 이를 계산하지 않음) 4) 장기 미납에 리스제공자의 무청구·회신·반복 수용이 겹쳐 합의 여부가 먼저인 경우 5) 큰 선납의 소멸 여부를 확인하지 않은 경우 6) 지급 일정이나 충당 지정을 손익 조정에 쓰는 경우"],
+      ['실제 납부 특수 케이스','도구 밖',"연체이자의 계정 구분, 청구·면제 없는 법정 손해금의 인식, 문단 37 해석 위험은 도구 밖의 특수 케이스임. 해당 건이 생기면 별도 검토함"],
+      ['실제 납부 근거','판단',"찾은 범위에서 합의 없는 미납을 직접 다룬 공개 자료는 회계법인(BDO) 의견뿐이고 위약금·이자가 없는 경우를 전제함. 기준서가 직접 정한 방식이 아닌 판단임(문단 36·37)"],
       ['도구 버전',TOOL_VER,'작업상태 스키마 v'+SS_VER],
       ['생성일시',kst,'이 파일을 내려받은 시각']];
     const wsA=XLSX.utils.aoa_to_sheet(aoa);
@@ -906,7 +905,7 @@ function inputWarnings(){
       let I=null; try{ I=leaseToI(L); }catch(e){}
       if(I && !(I.depFace>0)) noFace.push(id); });
     if(sm==='daily' && hit.length) W.push({t:`보증금 변동이 반영되지 않음 ${hit.length}건 - 실제일 일할 모드`, d:hit,
-      h:"'보증금변동' 시트는 <b>월말 간주(월할)</b> 엔진에서만 반영됩니다. 좌측 <b>[개시일 처리 방식]</b>을 월말 간주로 바꾸거나, 변동분은 수기 처리하세요. 지금 금액은 <b>개시 시점 보증금 액면</b> 기준입니다."});
+      h:"'보증금변동' 시트는 <b>월말 기준(월할)</b> 엔진에서만 반영됩니다. 좌측 <b>[개시일 처리 방식]</b>을 월말 기준로 바꾸거나, 변동분은 수기 처리하세요. 지금 금액은 <b>개시 시점 보증금 액면</b> 기준입니다."});
     if(noFace.length) W.push({t:`보증금 변동이 있으나 ④ 보증금 액면이 빈 계약 ${noFace.length}건`, d:noFace,
       h:"개시 시점 보증금(마스터 ④ <b>보증금액면</b>)이 있어야 변동이 반영됩니다 - 액면을 채우거나, 변동이 아니라 신규 보증금이면 ④에 직접 넣으세요."});
     const orphD=Object.keys(DEPS).filter(k=>!Ls.some(L=>idOf(L)===k));
@@ -930,7 +929,7 @@ function inputWarnBox(){ const W=inputWarnings(); if(!W.length) return "";
       `<div style="font-size:12px;color:#8a6a10">→ ${w.h}</div></div>`).join("")+`</div>`; }
 function modsPrune(){ Object.keys(MODS).forEach(id=>{ const L=(LEASES||[]).find(x=>String(x.lease_id||'')===id);
     if(!L){ delete MODS[id]; return; } const I=leaseToI(L), md=parseYMD(MODS[id].mdate);
-    if(!(md>new Date(I.cy,I.cm,I.cday))) delete MODS[id]; }); }   // 재기준 행(변경일=개시일)에 남은 저장값은 i02를 통째로 지운다
+    if(!(md>new Date(I.cy,I.cm,I.cday))) delete MODS[id]; }); }   // 이월 행(변경일=개시일)에 남은 저장값은 i02를 통째로 지운다
 function parseI01(wb){
   const ws=wb.Sheets['마스터']||wb.Sheets[wb.SheetNames[0]];
   const all=XLSX.utils.sheet_to_json(ws,{header:1,blankrows:true,raw:true});   // 빈 행 유지 = 배열 인덱스가 실제 엑셀 행번호와 일치(안내 메시지용)
@@ -958,12 +957,14 @@ function refreshLeaseSelect(autoPick){
     try{ const I=leaseToI(L); if(I.cy&&I.term>0&&I.payment>0){ const r=I.startmode==='daily'?computeDaily(I):compute(I); lab+=` - 리스부채 ${won(r.liability)} / 사용권 ${won(r.rou)}`; } }catch(err){}
     return `<option value="${i}">${lab}</option>`; });
   if(LEASES.length>1) opts=[`<option value="__sum__">★ 요약 (전체 ${LEASES.length}건)</option>`,
-    `<option value="__i02__">★ i02 반영 결과 (납부차이·판정/조정 내역)</option>`].concat(opts);
+    `<option value="__i02__">★ 실제 납부 반영 결과 (판정·조정 내역)</option>`].concat(opts);
   sel.innerHTML=opts.join('');
   document.getElementById('pickcount').textContent=LEASES.length;
   document.getElementById('pickwrap').classList.remove('hidden');
   document.getElementById('i02wrap').classList.remove('hidden');   // i01 업로드 후 i02 양식·업로드 노출
-  document.getElementById('curwrap').classList.remove('hidden');   // 화면 수정 반영 i01 다운로드
+  document.getElementById('curwrap').classList.remove('hidden');
+  const xh=document.getElementById('xlhint'); if(xh) xh.classList.add('hidden');   // 파일을 올린 뒤에는 첫 사용 안내를 접는다
+     // 화면 수정 반영 i01 다운로드
   if(autoPick){ if(LEASES.length>1){ sel.value='__sum__'; pickLease('__sum__'); } else pickLease(0); }
 }
 function pickLease(idx){
@@ -1056,7 +1057,7 @@ function compute(I){
   // 보증금
   const dr=mrate(I.depRate>0?I.depRate:I.rate,I.conv), depN=I.depFace?I.depN:0;
   const depPV=I.depFace? R(I.depFace/Math.pow(1+dr,depN)) :0;
-  const depDiff=(I.openRou>0)?0:(I.depFace? R(I.depFace-depPV):0);   // 재측정 이월(openRou) 시 현할차는 이미 이월ROU에 포함 → 중복 상각 방지(보증금 금융자산 상각은 depPV로 계속)
+  const depDiff=(I.openRou>0)?0:(I.depFace? R(I.depFace-depPV):0);   // 재측정 이월(openRou) 시 현재가치할인차금는 이미 이월ROU에 포함 → 중복 상각 방지(보증금 금융자산 상각은 depPV로 계속)
   // 사용권자산 원가
   const depm = (I.transfer&&I.ul)? I.ul : Math.min(I.ul||I.term, I.term);
   const rou = I.openRou>0 ? R(I.openRou) : R(liability+I.prepaid-I.incentive+I.idc+I.restore+depDiff);   // 이월 사용권자산(재측정 이월)이 있으면 그 순장부를 상각 기준으로 - 리스부채·이자는 수정조건으로 그대로 산출
@@ -1072,7 +1073,7 @@ function compute(I){
   // ── 보증금 변동(기중 증액·일부반환) ─────────────────────────────────────────────
   // 계약 갱신 등으로 보증금이 중간에 바뀌면 개시일부터 소급하면 안 된다(전기 숫자가 틀어짐).
   // 변동월 '말일'에 인식: 추가 납입액을 반환월까지 남은 기간으로 할인해 금융자산에 더하고,
-  // 액면−현재가치(현할차)는 선급리스료 성격이므로 그 시점 사용권자산에 가산해 잔여 상각기간에 나눠 상각한다.
+  // 액면−현재가치(현재가치할인차금)는 선급리스료 성격이므로 그 시점 사용권자산에 가산해 잔여 상각기간에 나눠 상각한다.
   const depMoves=new Map(), depMoveList=[]; let depFaceTot=I.depFace, depWarn='';
   const dwarn=w=>{ depWarn += (depWarn?'<br>':'') + w; };   // 경고 누적 - 덮어쓰면 앞 경고(초과반환 등)가 뒤 경고에 가려진다(코워크 P3)
   // 시간순(k순) 처리 - compute()는 입력 정렬을 보장받지 못한다(세션 복원·차기 i01 왕복·직접 호출).
@@ -1087,15 +1088,15 @@ function compute(I){
   _cand.sort((a,b)=>a.k-b.k);
   _cand.forEach(({m,me,k})=>{
     if(!I.depFace){ dwarn('보증금 변동이 있으나 ④ 보증금 액면이 비어 있습니다 - 개시 시점 보증금을 먼저 입력하세요.'); return; }
-    if(k<1){ dwarn('보증금 변동일('+m.date+')이 간주개시월 말일('+fmtD(deemed)+') 이전이거나 같습니다 - 반영하지 않았습니다. 개시 시점 변동이면 ④ 보증금 액면에 합산하세요.'); return; }
+    if(k<1){ dwarn('보증금 변동일('+m.date+')이 계산 개시월 말일('+fmtD(deemed)+') 이전이거나 같습니다 - 반영하지 않았습니다. 개시 시점 변동이면 ④ 보증금 액면에 합산하세요.'); return; }
     if(k>=depN){ dwarn('보증금 변동일('+m.date+')이 반환월 이후입니다 - 반영하지 않았습니다.'); return; }
     // 반환 초과 가드 - 모든 트랜치가 같은 반환월·같은 율로 할인되므로 '누적 액면 < 0' ⟺ '변동월 장부잔액 < 0'(등가).
     // 가드가 없으면 입력 실수(0 하나 더) 시 경고 없이 음수 보증금·음수 이자수익이 재무제표에 실린다(코워크 F1).
     if(m.amt<0 && depFaceTot+m.amt<0){ dwarn('보증금 반환('+m.date+') '+won(-m.amt)+'이 반환 시점 보증금 잔액(액면 누계 '+won(depFaceTot)+')을 초과합니다 - 반영하지 않았습니다. 전액 반환이면 중도해지(⑥)를 쓰세요.'); return; }
     const pv=R(m.amt/Math.pow(1+dr,depN-k)), diff=R(m.amt-pv);
     // 상각기간 종료 후(반환월 전) 변동 - 종전에는 통째로 기각해 금융자산까지 버렸다(코워크 E3).
-    // 현재가치는 보증금(금융자산)에 가산하고, 현할차는 배분할 상각기간이 없으므로 그 달 손익으로 즉시 인식한다.
-    if(k>=depm) dwarn('보증금 변동일('+m.date+')이 상각기간 종료 후입니다 - 현재가치 '+won(pv)+'는 보증금(금융자산)에 가산하고, 현할차 '+won(Math.abs(diff))+'는 배분할 잔여 상각기간이 없어 그 달 감가상각비'+(diff>=0?'':' 환입')+'로 즉시 인식했습니다. 검토하세요.');
+    // 현재가치는 보증금(금융자산)에 가산하고, 현재가치할인차금는 배분할 상각기간이 없으므로 그 달 손익으로 즉시 인식한다.
+    if(k>=depm) dwarn('보증금 변동일('+m.date+')이 상각기간 종료 후입니다 - 현재가치 '+won(pv)+'는 보증금(금융자산)에 가산하고, 현재가치할인차금 '+won(Math.abs(diff))+'는 배분할 잔여 상각기간이 없어 그 달 감가상각비'+(diff>=0?'':' 환입')+'로 즉시 인식했습니다. 검토하세요.');
     const cur=depMoves.get(k)||{amt:0,pv:0,diff:0};
     depMoves.set(k,{amt:cur.amt+m.amt, pv:cur.pv+pv, diff:cur.diff+diff});
     depMoveList.push({date:fmtD(me), input:m.date, amt:R(m.amt), pv, diff, t:k});
@@ -1114,15 +1115,15 @@ function compute(I){
     let ro=0,dep=0,rc=0,ddiff=0;
     if(t<=depm){ dep = t!==depm? mdep : R(bv); ddiff = depDiffTot?(t!==depm? mdiff : R(depDiffTot-cumdiff)):0; cumdiff+=ddiff; ro=bv; rc=bv-dep; accum+=dep; bv=rc; } else { ro=rc=bv; }
     const _mv=depMoves.get(t);
-    if(_mv && t<depm){   // 변동월 말일 → 그 달 기말 자산에 현할차 가산, 상각은 다음 달부터 재계산
+    if(_mv && t<depm){   // 변동월 말일 → 그 달 기말 자산에 현재가치할인차금 가산, 상각은 다음 달부터 재계산
       let _nb=R(bv+_mv.diff);
       if(_nb<0){   // 환입이 ROU 잔액을 초과 - 음수 사용권자산·음수 정액감가 방지(코워크 E2): 초과분은 그 달 감가 환입으로 즉시 인식
         dep=R(dep+_nb); ddiff=R(ddiff+_nb); cumdiff+=_nb; accum=R(accum+_nb);
-        dwarn('보증금 반환('+fmtD(monthEnd(addMonths(deemed,t).getFullYear(),addMonths(deemed,t).getMonth()))+')의 현할차 환입이 사용권자산 잔액을 초과합니다 - 초과분 '+won(-_nb)+'을 그 달 감가상각비 환입(음수)으로 즉시 인식했습니다. 실질이 범위축소라면 ⑦ 축소일·비율을 쓰세요.');
+        dwarn('보증금 반환('+fmtD(monthEnd(addMonths(deemed,t).getFullYear(),addMonths(deemed,t).getMonth()))+')의 현재가치할인차금 환입이 사용권자산 잔액을 초과합니다 - 초과분 '+won(-_nb)+'을 그 달 감가상각비 환입(음수)으로 즉시 인식했습니다. 실질이 범위축소라면 ⑦ 축소일·비율을 쓰세요.');
         _nb=0; }
       bv=_nb; rc=bv; depDiffTot=R(depDiffTot+_mv.diff);
       const remM=depm-t; mdep=R(bv/remM); mdiff=R((depDiffTot-cumdiff)/remM);
-    } else if(_mv){   // t>=depm (반환월 전) - 상각기간 종료 후 변동: ROU는 0 유지, 현할차는 그 달 손익 즉시 인식(코워크 E3)
+    } else if(_mv){   // t>=depm (반환월 전) - 상각기간 종료 후 변동: ROU는 0 유지, 현재가치할인차금는 그 달 손익 즉시 인식(코워크 E3)
       dep=R(dep+_mv.diff); ddiff=R(ddiff+_mv.diff); cumdiff+=_mv.diff; accum=R(accum+_mv.diff); depDiffTot=R(depDiffTot+_mv.diff);
     }
     let dopen=0,inc=0,dcls=0;
@@ -1156,10 +1157,10 @@ function depNote(res){
   const tot=L.reduce((a,m)=>({amt:a.amt+m.amt,pv:a.pv+m.pv,diff:a.diff+m.diff}),{amt:0,pv:0,diff:0});
   return w+`<div class="note" style="background:#eef2f7;border-left:3px solid var(--navy);margin:10px 0 0">`+
     `<b>■ 보증금 변동 ${L.length}건 반영</b> - 액면 ${won(res.I.depFace)} → <b>${won(res.depFaceTot)}</b><br>`+
-    `<div class="tblbox" style="max-height:none;max-width:520px;margin:6px 0"><table>`+thead(['변동월(말일)','변동액','현재가치(금융자산)','현할차(사용권자산)'])+rows+
+    `<div class="tblbox" style="max-height:none;max-width:520px;margin:6px 0"><table>`+thead(['변동월(말일)','변동액','현재가치(금융자산)','현재가치할인차금(사용권자산)'])+rows+
     `<tr class="tot" style="font-weight:700;background:#eef2f7"><td class="l">합계</td><td>${won(tot.amt)}</td><td>${won(tot.pv)}</td><td>${won(tot.diff)}</td></tr></table></div>`+
     `<span style="color:#666">변동월 <b>말일</b>에 인식합니다 - 추가 납입액을 반환월까지 남은 기간으로 할인해 <b>보증금(금융자산)</b>에 더하고, `+
-    `액면과의 차액(현할차)은 <b>선급리스료 성격</b>이라 그 시점 <b>사용권자산에 가산</b>해 잔여 상각기간에 나눠 상각합니다. `+
+    `액면과의 차액(현재가치할인차금)은 <b>선급리스료 성격</b>이라 그 시점 <b>사용권자산에 가산</b>해 잔여 상각기간에 나눠 상각합니다. `+
     `개시일로 <b>소급하지 않습니다</b>(전기 숫자 불변). 리스료도 함께 올랐다면 그건 <b>리스변경(재측정)</b>이라 [납부차이] 탭에서 따로 확정하세요.</span></div>`;
 }
 function redNote(res){
@@ -1308,16 +1309,16 @@ function applyTermination(res){
   if(!keep.length){
     // 개시월 해지 - 개시일이 16일 이후면 deemed=당월말이라 첫 행이 다음 달이어서 인식할 월말 행이 없다.
     // 스케줄을 비우면 asofMetrics가 '아직 미개시'로 읽어 부채·자산이 그대로 남으므로(문단 46 위반),
-    // 개시 시점 잔액을 담은 행 1개를 세우고 아래 공통 로직으로 전액 제거한다(당월 이자·감가는 월말 간주상 미인식).
+    // 개시 시점 잔액을 담은 행 1개를 세우고 아래 공통 로직으로 전액 제거한다(당월 이자·감가는 월말 기준상 미인식).
     const pay0=(I.timing==='선급')?pmtVec(I)[0]:0;   // 비정액 계약은 1회차가 정기리스료와 다르다(형제 경로와 동일하게 pmtVec 사용)
     last={t:0, as_of:eME, lo:R(res.liability-pay0), intr:0, pay:0,
           lc:R(res.liability-pay0),
           ro:R(res.rou), dep:0, rc:R(res.rou), accum:0,
           dopen:R(res.depPV||0), inc:0, dcls:R(res.depPV||0), ddiff:0, isPay:false};
     keep.push(last);
-    res.termWarn='개시월에 해지된 리스입니다 - 월말 간주 스케줄에 인식할 행이 없어 개시 시점 리스부채·사용권자산을 전액 제거했습니다(해지월 이자·감가는 미인식).';
+    res.termWarn='개시월에 해지된 리스입니다 - 월말 기준 스케줄에 인식할 행이 없어 개시 시점 리스부채·사용권자산을 전액 제거했습니다(해지월 이자·감가는 미인식).';
   } else last=keep[keep.length-1];
-  // ── M-3: 해지일이 월중이면 해지월의 이자·감가·보증금이자·현할차를 경과일수로 안분 ──
+  // ── M-3: 해지일이 월중이면 해지월의 이자·감가·보증금이자·현재가치할인차금를 경과일수로 안분 ──
   // 후급 리스료는 기간 말에 도래하므로 해지일 전이면 미지급으로 본다(실제 정산은 해지정산금으로).
   let termFrac=1;
   if(prorateOn() && last.t!==0){
@@ -1363,12 +1364,12 @@ function applyTermination(res){
   return res;
 }
 
-// ===== 실제일 일할(ACT/365 유효) - 월중 개시일 그대로, 간주조정 없음 =====
+// ===== 실제일 일할(연 365일) - 월중 개시일 그대로, 간주조정 없음 =====
 function computeDaily(I){
   const C=new Date(I.cy,I.cm,I.cday), ra=I.rate, dra=I.depRate>0?I.depRate:I.rate;
   const ppy=FREQ[I.freq], mpp=12/ppy, n=Math.floor(I.term/mpp);
   const span=(a,b)=>Math.round((b-a)/86400000);
-  const efr=(rate,days)=> days<=0?0:Math.pow(1+rate,days/365)-1;   // ACT/365 유효
+  const efr=(rate,days)=> days<=0?0:Math.pow(1+rate,days/365)-1;   // 연 365일 유효
   const P=pmtVec(I);
   let payDates=[];
   if(I.timing==='선급'){for(let k=0;k<n;k++)payDates.push(addMonths(C,k*mpp));}   // 선급=기간 개시일 지급
@@ -1377,7 +1378,7 @@ function computeDaily(I){
   const liability=R(pv);
   const depN=I.depFace?I.depN:0, refund=I.depFace?periodEnd(C,depN):null;
   const depPV=I.depFace?R(I.depFace/Math.pow(1+dra,span(C,refund)/365)):0;
-  const depDiff=(I.openRou>0)?0:(I.depFace?R(I.depFace-depPV):0);   // 재측정 이월 시 현할차 중복 방지(위 compute와 동일)
+  const depDiff=(I.openRou>0)?0:(I.depFace?R(I.depFace-depPV):0);   // 재측정 이월 시 현재가치할인차금 중복 방지(위 compute와 동일)
   const depm=(I.transfer&&I.ul)?I.ul:Math.min(I.ul||I.term,I.term);
   const deprEnd=periodEnd(C,depm), rou = I.openRou>0 ? R(I.openRou) : R(liability+I.prepaid-I.incentive+I.idc+I.restore+depDiff);   // 이월 사용권자산 override(재측정 이월)
   const leaseEnd=periodEnd(C,I.term);
@@ -1409,7 +1410,7 @@ function computeDaily(I){
     if(segEndDep.getTime()>prevDep.getTime()){
       const d=span(prevDep,segEndDep);
       dep = (segEndDep.getTime()===deprEnd.getTime())? bv : R(rou*d/totDeprDays);
-      // 현할차상각비(보증금 평가차액 정액상각분) 일할 안분 - 배치 fm_full.py:69 동일. 마지막 구간은 잔액 플러그로 합계 일치
+      // 현재가치할인차금 상각비(보증금 평가차액 정액상각분) 일할 안분 - 배치 fm_full.py:69 동일. 마지막 구간은 잔액 플러그로 합계 일치
       ddiff = depDiff? ((segEndDep.getTime()===deprEnd.getTime())? R(depDiff-cumdiff) : R(depDiff*d/totDeprDays)) : 0;
       cumdiff+=ddiff;
       accum+=dep; bv-=dep; prevDep=segEndDep;
@@ -1429,11 +1430,11 @@ function computeDaily(I){
       ro:R(ro),dep:R(dep),rc:R(rc),accum:R(accum), dopen:R(dopen),inc:R(inc),dcls:R(dcls), ddiff:R(ddiff), isPay:pay!==0});
     prevL=ME;
   }
-  // 보증금 변동은 월말 간주 엔진(compute)에만 구현돼 있다 - 일할 모드에서 조용히 무시되지 않도록 경고한다.
+  // 보증금 변동은 월말 기준 엔진(compute)에만 구현돼 있다 - 일할 모드에서 조용히 무시되지 않도록 경고한다.
   const depMoveList=[], depFaceTot=I.depFace;
   const depWarn=(I.deps&&I.deps.length)
-    ? `이 계약은 <b>실제일 일할(ACT/365)</b> 모드입니다 - <b>'보증금변동' 시트의 ${I.deps.length}건이 반영되지 않았습니다</b>(월말 간주 모드에서만 지원). `+
-      `보증금 액면은 개시 시점 <b>${won(I.depFace)}</b> 기준으로 계산됐습니다. 반영하려면 좌측 [개시일 처리 방식]을 <b>월말 간주(월할)</b>로 바꾸거나, 변동분은 수기 처리하세요.`
+    ? `이 계약은 <b>실제일 일할(연 365일)</b> 모드입니다 - <b>'보증금변동' 시트의 ${I.deps.length}건이 반영되지 않았습니다</b>(월말 기준 모드에서만 지원). `+
+      `보증금 액면은 개시 시점 <b>${won(I.depFace)}</b> 기준으로 계산됐습니다. 반영하려면 좌측 [개시일 처리 방식]을 <b>월말 기준(월할)</b>로 바꾸거나, 변동분은 수기 처리하세요.`
     : '';
   return applyTermination(applyReduction({I,liability,depPV,depDiff,rou,depm,deemed:C,rows,mode:'daily',
     depMoveList, depFaceTot, depWarn,
@@ -1445,15 +1446,15 @@ function journal(res){
   const I=res.I, je=[], d=fmtD(res.deemed);
   const reb=I.openRou>0;   // 재측정 이월 행: 새 리스가 아니라 전기 장부에서 넘어온 시작 잔액
   je.push([d,reb?'재측정 이월 시작 잔액(신규 인식 아님)':'리스 최초인식','사용권자산',res.rou,'리스부채',res.liability]);
-  const extra=res.rou-res.liability;   // 선급+직접원가+복구+보증금현할차 − 인센티브 (순액)
+  const extra=res.rou-res.liability;   // 선급+직접원가+복구+보증금 현재가치할인차금 − 인센티브 (순액)
   if(extra>0) je.push([d,reb?'이월 잔액 차이(사용권자산 > 리스부채, 신규 현금 아님)':'최초원가 조정(선급·직접원가·복구·인센티브·보증금차액 순액)','',0,reb?'이월 잔액 차이':'현금및복구충당부채등',extra]);
   else if(extra<0) je.push([d,reb?'이월 잔액 차이(리스부채 > 사용권자산, 신규 현금 아님)':'최초원가 조정(리스인센티브 우세 · 순수취)',reb?'이월 잔액 차이':'현금(리스인센티브)등',-extra,'',0]);
   if(res.depPV!==0) je.push([d,'보증금 최초인식(현재가치)','보증금',res.depPV,'현금',res.depPV]);
-  (res.depMoveList||[]).forEach(m=>{   // 기중 보증금 증액·일부반환 - 현재가치는 금융자산, 현할차는 선급리스료 성격이라 사용권자산
+  (res.depMoveList||[]).forEach(m=>{   // 기중 보증금 증액·일부반환 - 현재가치는 금융자산, 현재가치할인차금는 선급리스료 성격이라 사용권자산
     if(m.amt>0){ je.push([m.date,'보증금 추가 납입(현재가치)','보증금',m.pv,'현금',m.amt]);
-      if(m.diff) je.push([m.date,'보증금 현할차 → 사용권자산(선급리스료 성격)','사용권자산',m.diff,'',0]); }
+      if(m.diff) je.push([m.date,'보증금 현재가치할인차금 → 사용권자산(선급리스료 성격)','사용권자산',m.diff,'',0]); }
     else { je.push([m.date,'보증금 일부 반환','현금',-m.amt,'보증금',-m.pv]);
-      if(m.diff) je.push([m.date,'보증금 현할차 조정 → 사용권자산 차감','',0,'사용권자산',-m.diff]); }
+      if(m.diff) je.push([m.date,'보증금 현재가치할인차금 조정 → 사용권자산 차감','',0,'사용권자산',-m.diff]); }
   });
   if(I.timing==='선급'){ const p0=pmtVec(I)[0]; je.push([d,'리스개시일 1회차 리스료 지급','리스부채',p0,'현금',p0]); }
   const co=I.cutoff;
@@ -1461,10 +1462,10 @@ function journal(res){
     const cap = (co===null)||(x.t<=co);
     const dstr=fmtD(x.as_of), ym=`${x.as_of.getFullYear()}년 ${x.as_of.getMonth()+1}월`;   // 적요는 달력 월(x.t는 경과 개월)
     if(x.intr!==0){ const acc=(cap&&I.capInt)?'건설중인자산':'이자비용';
-      je.push([dstr,`${ym} 이자비용${(cap&&I.capInt)?' →건중':''}`,acc,x.intr,'리스부채',x.intr]); }
+      je.push([dstr,`${ym} 이자비용${(cap&&I.capInt)?' →건설중인자산':''}`,acc,x.intr,'리스부채',x.intr]); }
     if(x.pay!==0) je.push([dstr,`${ym} 리스료 지급`,'리스부채',x.pay,'현금',x.pay]);
     if(x.dep!==0){ const acc=(cap&&I.capDep)?'건설중인자산':'감가상각비';
-      je.push([dstr,`${ym} 감가상각${(cap&&I.capDep)?' →건중':''}`,acc,x.dep,'사용권자산상각누계액',x.dep]); }
+      je.push([dstr,`${ym} 감가상각${(cap&&I.capDep)?' →건설중인자산':''}`,acc,x.dep,'사용권자산상각누계액',x.dep]); }
     if(x.inc!==0) je.push([dstr,`${ym} 보증금 이자수익`,'보증금',x.inc,'이자수익',x.inc]);
   });
   if(res.reduction){   // 범위 축소 - 축소월 말일자로 비율만큼 제거(문단 46(a))
@@ -1501,14 +1502,14 @@ function journal(res){
 
 // 회계연도 개시월(기본 1월=역년). 3월·6월 결산 법인은 결산일만 바꿔도 '당기'가 어긋나므로 별도 설정을 둔다.
 function fyStartMonth(){ const g=document.getElementById('fystart'); const v=g?parseInt(g.value):1; return (v>=1&&v<=12)?v:1; }
-// 당기누적(YTD) PL 창의 시작점 = '직전 회계연도 말일'. 결산일이 회계연도 개시월 전이면 당기는 전년 시작이다.
+// 당기누적 PL 창의 시작점 = '직전 회계연도 말일'. 결산일이 회계연도 개시월 전이면 당기는 전년 시작이다.
 function fyPrevEnd(asof){
   const m0=fyStartMonth()-1;
   let y=asof.getFullYear();
   if(asof.getMonth()<m0) y--;
   return new Date(y, m0, 0);
 }
-// ===== 검증(수식↔일할) : 간주(월할) vs FM(일할) + 요인분해(월할효과·개시일효과) =====
+// ===== 검증(월말 기준↔실제 일수) : 간주(월할) vs FM(일할) + 요인분해(월할효과·개시일효과) =====
 function getAsof(I){
   const v=document.getElementById('asof').value;
   if(v){ const p=v.split('-').map(Number); return new Date(p[0],p[1]-1,p[2]); }
@@ -1516,7 +1517,7 @@ function getAsof(I){
 }
 function _daysJS(a,b){ return Math.round((b-a)/86400000); }
 // ===== M-3 월중 이벤트 일할 안분 =====
-// 월말 간주 스케줄에서 해지·축소·재측정이 월중에 일어나면 그 달이 통째로 한쪽 조건으로 잡힌다.
+// 월말 기준 스케줄에서 해지·축소·재측정이 월중에 일어나면 그 달이 통째로 한쪽 조건으로 잡힌다.
 // 옵션을 켜면 그 달의 이자·감가만 경과일수로 안분한다(행 개수·as_of는 그대로 - 소비처 영향 최소).
 // 기본값 OFF = 기존 배치 수식화 워크페이퍼와 숫자 호환 유지.
 function prorateOn(){ const g=document.getElementById('prorate'); return !!(g&&g.checked); }
@@ -1547,7 +1548,7 @@ function fmMetrics(I,asof){   // 실제개시일 기준 actual/365 (verify_fm.fm
   const rou0=I.openRou>0?I.openRou:(liab0+I.prepaid-I.incentive+I.idc+I.restore+depDiff), accum=rou0*frac;   // 재측정 이월 행은 이월 사용권자산이 원가(compute와 같은 기준)
   return {liab_total:balAsof, pl_int:cumInt, rou_bv:rou0-accum, accum_dep:accum, liab0, rou0};
 }
-function deemedMetrics(res,asof){   // 월말 간주 스케줄에서 결산일 지표
+function deemedMetrics(res,asof){   // 월말 기준 스케줄에서 결산일 지표
   const advance=(res.I.timing==='선급'), pmt0=advance?pmtVec(res.I)[0]:0;   // 비정액 선급 1회차(A-1)
   const le=res.rows.filter(x=>x.as_of<=asof);
   let liab_total,rou_bv,accum;
@@ -1556,7 +1557,7 @@ function deemedMetrics(res,asof){   // 월말 간주 스케줄에서 결산일 �
   return {liab_total, rou_bv, accum_dep:accum, pl_int:le.reduce((s,x)=>s+x.intr,0), liab0:res.liability, rou0:res.rou};
 }
 function analyzeVerify(I,asof){
-  const res=compute(I);                        // 항상 월말 간주 스케줄로 비교
+  const res=compute(I);                        // 항상 월말 기준 스케줄로 비교
   const g=deemedMetrics(res,asof), f=fmMetrics(I,asof), r=I.rate, deemed=res.deemed;
   let cfs=res.rows.filter(x=>x.pay>0).map(x=>[x.as_of,x.pay]);
   if(I.timing==='선급') cfs=[[deemed,pmtVec(I)[0]]].concat(cfs);
@@ -1578,7 +1579,20 @@ function analyzeVerify(I,asof){
   ];
   return {asof, deemed, cdate:new Date(I.cy,I.cm,I.cday), items};
 }
-function causeLabel(dc,an){ const a=Math.abs(an),d=Math.abs(dc); if(a<1&&d<1)return '차이 없음'; return a>=d?'개시일·지급일정 스냅':'월할↔일할(ACT/365)'; }
+// 검증 탭 판정: 두 계산 방식의 가장 큰 차이가 최초 리스부채의 1% 미만이면 '차이 작음'. 금액 계산에는 쓰지 않는다.
+const VERIFY_TOL=0.01;
+function verifyVerdict(I,V,base){
+  const box=(bg,bd,col,t)=>`<div class="note" style="background:${bg};border:1px solid ${bd};color:${col};margin:0 0 8px;font-size:13px">${t}</div>`;
+  const ok=t=>box('#eef7f0','#b7dcc2','#177245',t), warn=t=>box('var(--amber)','#e0c060','#7a5b00',t);
+  if(I.endDate||(I.redDate&&I.redPct>0)||MODS[I.id]) return box('#eef2f7','#dbe6f2','#555',`<b>■ 이 계약은 참고용 비교입니다</b> 해지·축소·재측정이 있으면 실제 일수 기준 열은 원계약 전체 기간으로 계산되어 차이가 크게 보입니다. 금액 확인은 상단 카드와 [납부차이]·[리스변경] 탭으로 하세요.`);
+  const mx=V.items.map(x=>({n:x[0],t:x[1]-x[2],lab:causeLabel(x[3],x[4])})).reduce((a,b)=>Math.abs(b.t)>Math.abs(a.t)?b:a);
+  if(Math.abs(mx.t)<1) return ok(`<b>■ 차이 없음</b> 두 계산 방식의 금액이 같습니다. 할 일이 없습니다.`);
+  const pct=base>0?Math.abs(mx.t)/base:0, p=(pct*100).toFixed(pct<0.001?2:1), mode=I.startmode==='daily'?' 지금 화면은 실제일 일할입니다.':'';
+  const big=`가장 큰 차이는 ${mx.n} <b>${won(Math.abs(mx.t))}원</b>으로 최초 리스부채의 ${p}%입니다.`;
+  if(pct<VERIFY_TOL) return ok(`<b>■ 차이 작음</b> ${big} 할 일이 없습니다.${mode}`);
+  return warn(`<b>■ 확인 필요</b> ${big} 원인: ${mx.lab}.${mode} 이 차이가 회사 중요성 기준을 넘으면 좌측 [개시일 처리 방식]을 바꿔 결산 금액을 비교하세요. 결산일 앞뒤로 지급일이 갈린 리스부채 차이는 다음 지급 때 사라집니다.`);
+}
+function causeLabel(dc,an){ const a=Math.abs(an),d=Math.abs(dc); if(a<1&&d<1)return '차이 없음'; return a>=d?'개시일·지급일을 월말로 맞춘 차이':'월할과 일할의 차이'; }
 
 // 결산일 현재 지표 (현재 스케줄 RES 기준, 유동/비유동 포함)
 function asofMetrics(res,asof){
@@ -1614,12 +1628,12 @@ function contractualSchedule(I){
   return sched;
 }
 // i02 오버레이(재측정 정규화 포함) - 그 리스의 재측정이 확정 저장(MODS)돼 있으면 변경유효일 이후 회차는
-// i02 조정 대상에서 제외한다(계약대로 = 중립). 그 구간은 재측정·차기 i01 이월이 다루는 영역이므로,
+// 실제 납부 조정 대상에서 제외한다(계약대로 = 중립). 그 구간은 재측정·차기 i01 이월이 다루는 영역이므로,
 // i02에 남겨두면 증액분이 '초과납'으로 다시 잡혀 이중계상된다. 변경일 이전(선납/지연)은 그대로 유지.
 let I02PRE={};   // 리스ID → 개시일 이전이라 무시한 i02 회차 수(경고용)
 function i02Overlay(I){
   const ov0=I02[I.id]; if(!ov0) return null;
-  // 개시일 이전에 지급된 i02 회차는 이 계약의 것이 아니다 - 재측정 재기준(개시일=변경일)으로 이월된 계약에
+  // 개시일 이전에 지급된 i02 회차는 이 계약의 것이 아니다 - 재측정 이월(개시일=변경일)으로 이월된 계약에
   // 원계약 회차 체계의 i02를 그대로 올리면 회차가 통째로 어긋난다(작업상태 .json 없이 i01·i02만 이월한 경우).
   // MODS가 남아 있으면 아래 변경일 절단이 같은 일을 하지만, 없을 때도 방어해야 한다.
   const c0=new Date(I.cy,I.cm,I.cday); let pre=0, ov=ov0;
@@ -1632,7 +1646,7 @@ function i02Overlay(I){
   cs.forEach(r=>{ const o=ov[r.seq]; if(o && r.cdate<=md) out[r.seq]=o; });
   return out;
 }
-function actualKey(I){ return [I.id,I.cy,I.cm,I.cday,I.term,I.freq,I.timing,I.payment,MODS[I.id]?MODS[I.id].mdate:'',I.endDate||'',I.redDate||'',I.redPct||0,I.pmts?JSON.stringify(I.pmts):''].join('|'); }   // 계약 지급 일정을 바꾸는 값은 모두 키에 넣는다(해지·축소·승격 뒤 옛 목록이 가짜 조정이 되지 않게)
+function actualKey(I){ return [I.id,I.cy,I.cm,I.cday,I.term,I.freq,I.timing,I.payment,MODS[I.id]?MODS[I.id].mdate:'',I.endDate||'',I.redDate||'',I.redPct||0,I.pmts?JSON.stringify(I.pmts):''].join('|'); }   // 계약 지급 일정을 바꾸는 값은 모두 키에 넣는다(해지·축소·전환 뒤 옛 목록이 가짜 조정이 되지 않게)
 function ensureActual(I){
   const key=actualKey(I);
   if(ACTUAL_KEY!==key){
@@ -1796,9 +1810,7 @@ function pdiffSummary(I,asof,prev){
     h+=`<div class="tblbox" style="max-height:none"><table>`+thead(['차변계정','차변','대변계정','대변'])+jeToRows(jePrev)+`</table></div>`;
   }
   h+=`<div class="note">당기 리스부채 ${won(cur.liab)} · 현금·미지급 ${won(cur.cash)} 증감`+
-     (Math.abs(cur.rou)>=1||Math.abs(cur.dep)>=1?` · <b>사용권자산 ${won(cur.rou)}</b> · 감가상각비 ${won(cur.dep)} 증감`:'')+`. `+
-     `기준: 계약 스케줄 대비 지급 누계 차이(이자 조정 없음, 할인 없음). `+
-     (Math.abs(adjNow.rou)>=1?`총액 초과납은 사용권자산 가산·잔여기간 상각(아래 근거).`:`총액이 같은 선납/지연은 감가상각·보증금과 무관해 조정 없음.`)+`</div>`;
+     (Math.abs(cur.rou)>=1||Math.abs(cur.dep)>=1?` · <b>사용권자산 ${won(cur.rou)}</b> · 감가상각비 ${won(cur.dep)} 증감`:'')+`</div>`;
   if(Math.abs(adjNow.rou)>=1) h+=pdExcessNote(adjNow);
   return h;
 }
@@ -1806,6 +1818,7 @@ function pdiffSummary(I,asof,prev){
 const I02_TXT={
   unpaid:`이 금액에는 문단 37 이자가 없고 <b>지연손해금은 계산하지 않았습니다</b>. 약정 연체이자 조항이 있으면 경과분을 발생 기간 비용과 부채로 수기 인식합니다(리스변경 아님, 사용권자산 조정 없음).`,
   prepaid:`현재 계산은 선납을 합쳐 줄이는 <b>간편 처리</b>입니다. 지정·충당으로 후속 회차가 소멸했으면 제1109호 문단 3.3.1·3.3.3에 따라 할인 차액이 그날 손익입니다. 리스제공자가 충당 없이 보유하면 스케줄 유지와 선급 총액 표시입니다. 금액이 크면 원장을 확인하세요.`,
+  method:`이자비용은 계약 스케줄 그대로 두고, 리스부채만 <b>계약 지급 누계 - 실제 지급 누계</b>로 조정합니다(미지급 +, 선납 -, 할인 없음). 최초 리스부채는 지급 시기와 무관하게 변하지 않고, 모두 지급하면 차이는 0이 됩니다. 총액이 같은 선납/지연이면 사용권자산·감가상각비도 그대로이고, 누적 지급이 계약 총액을 넘는 초과분만 사용권자산에 가산해 잔여기간 상각합니다.`,
   scope:`이 규칙은 순수 일정 변동(지연, 밀린 금액 지급, 선납)에 씁니다. 연체이자·기한이익 상실·사실상 합의는 벗어난 사건으로 사건별로 판단합니다. 기한이익 상실은 계약 조항의 작동이어서 리스변경이 아니고, 유동 분류와 리스기간 재평가를 먼저 봅니다.`,
   input:`i02 지급액에는 리스료만 넣고 연체이자·지연손해금은 빼세요. 원래 계약 조항이나 법령에 따른 연체이자는 리스변경이 아니므로 발생 기간 비용으로 수기 처리합니다. 당사자가 합의해 리스료를 증액한 경우만 [리스변경] 탭(재측정)으로 보냅니다.`,
   special:`연체이자의 계정 구분, 청구·면제 없는 법정 손해금의 인식, 문단 37 해석 위험은 도구 밖의 특수 케이스입니다. 해당 건이 생기면 별도 검토합니다.`,
@@ -1815,7 +1828,8 @@ const I02_TXT={
 function i02PremiseHTML(kind){   // kind: 'unpaid' 미납 있음, 'prepaid' 선납 있음, '' 결산일에 차이 없음
   const lead=kind?`<div style="margin-top:6px"><b>${kind==='unpaid'?'미납 전제':'선납 전제'}</b> ${I02_TXT[kind]}</div>`:'';
   return `<div class="note" style="margin-top:6px;color:#555">`+lead+
-    `<details style="margin-top:4px"><summary style="cursor:pointer;font-weight:600;color:var(--navy)">이 규칙의 전제와 사용 제한 보기</summary>`+
+    `<details style="margin-top:4px"><summary style="cursor:pointer;font-weight:600;color:var(--navy)">계산 방법과 전제, 사용 제한 보기</summary>`+
+    `<div style="margin-top:4px"><b>계산 방법</b> ${I02_TXT.method}</div>`+
     `<div style="margin-top:4px"><b>적용 범위</b> ${I02_TXT.scope}</div>`+
     (kind==='unpaid'?'':`<div style="margin-top:4px"><b>미납 전제</b> ${I02_TXT.unpaid}</div>`)+
     (kind==='prepaid'?'':`<div style="margin-top:4px"><b>선납 전제</b> ${I02_TXT.prepaid}</div>`)+
@@ -1835,24 +1849,24 @@ function pdRateNote(I,adj){
     `<br><span style="color:#666">확정 미달분만 소멸시키므로 리스부채는 종료 시 0으로 수렴합니다. 뒤에서 몰아내기로 메워지는 무납월은 감면이 아니라 지연으로 봅니다.</span></div>`;
   if(adj.shortfall>=1) return `<div class="note" style="margin-top:8px;background:var(--amber);border:1px solid #e0c060;color:#7a5b00">`+
     `<b>⚠ 실제 지급 총액이 계약 총액보다 ${won(adj.shortfall)} 적습니다</b><br>`+
-    `미납이면 <b>미납액만큼 리스부채가 남는 것이 정상</b>이고(이 금액에 문단 37 이자는 없고 지연손해금은 계산하지 않았습니다), 계약 자체가 <b>비정액</b>(회차별 단가 상이)이면 i01의 정기 리스료·회차 구성을 정정해야 합니다. 어느 쪽인지 도구가 판별할 수 없어 <b>계약 할인율(${(I.rate*100).toFixed(3)}%)을 그대로 유지</b>했습니다. 앞으로 낼 회차의 금액을 i02에 넣지 않아 미달로 표시된 경우라면, 다 넣어도 결산일 금액은 같습니다.`+
+    `미납이면 <b>미납액만큼 리스부채가 남는 것이 정상</b>이고, 계약 자체가 <b>비정액</b>(회차별 단가 상이)이면 i01의 정기 리스료·회차 구성을 정정해야 합니다. 어느 쪽인지 도구가 판별할 수 없어 <b>계약 할인율(${(I.rate*100).toFixed(3)}%)을 그대로 유지</b>했습니다. 앞으로 낼 회차의 금액을 i02에 넣지 않아 미달로 표시된 경우라면, 다 넣어도 결산일 금액은 같습니다.`+
     (MODS[I.id]?`<br><b>※ 이 리스는 재측정이 저장돼 있어 i02를 변경유효일(${MODS[I.id].mdate})까지만 비교합니다</b> - 위 미달액은 변경일 이후로 미뤄진 상계분일 수 있습니다. 변경일 이후 구간은 재측정·차기 i01 이월이 처리합니다.`:'')+`</div>`+i02PremiseHTML('unpaid');
   if(!adj.timing) return '';
   return `<div class="note" style="margin-top:8px;background:#eef7f0;border:1px solid #b7dcc2;color:#177245">`+
-    `<b>■ 계약 할인율 ${(I.rate*100).toFixed(3)}% 유지 - 이자 조정 없음</b><br>`+
-    `이자비용은 계약 스케줄 그대로 두고, 리스부채만 <b>계약 지급 누계 - 실제 지급 누계</b>로 조정합니다(미지급 +, 선납 -, 할인 없음). 최초 리스부채·감가상각비는 지급 시기와 무관하게 변하지 않고, 모두 지급하면 차이는 0이 됩니다.`+
+    `<b>■ 계약 할인율 ${(I.rate*100).toFixed(3)}% 유지 - 이자 조정 없음</b>`+
     `</div>`+i02PremiseHTML(adj.liab>=1?'unpaid':(adj.liab<=-1?'prepaid':''));
 }
 // 초과납 회계처리 근거·커멘트 (문단 44~46 취지) - 총액 초과분이 있을 때만 표시
 function pdExcessNote(adj){
   return `<div class="note" style="margin-top:8px;background:var(--amber);border:1px solid #e0c060;color:#7a5b00">`+
     `<b>■ 총액 초과납 ${won(adj.rou)} → 사용권자산 가산</b>(누적 감가상각 ${won(adj.dep)})<br>`+
+    `<b>⚠ 초과분이 연체이자·지연손해금이라면</b> - 사용권자산 가산이 아니라 <b>발생 기간 비용</b>입니다. i02에는 리스료만 넣고 연체이자는 빼서 별도 전표로 처리하십시오. 당사자가 합의해 리스료를 증액한 경우만 [리스변경] 탭(재측정)으로 보냅니다.<br>`+
+    `<details style="margin-top:2px"><summary style="cursor:pointer;font-weight:600">근거와 다른 경우 보기</summary>`+
     `<b>근거</b> - 초과 지급액은 해당 리스에 대한 <b>비환급 추가 대가</b>로 보아 문단 44~46 취지에 따라 <b>사용권자산에 가산·잔여기간 상각</b>합니다(리스부채 상대계정=사용권자산). 총액이 같은 단순 선납/지연은 리스부채 조정만 하며 사용권자산은 건드리지 않습니다.<br>`+
     `<b>⚠ 커멘트</b> - 해당 초과분이 향후 리스료와 상계되는 <b>'선급리스료'(환급성)</b>라면 사용권자산이 아니라 <b>선급리스료(자산)</b>로 재분류 검토하십시오(그 경우 추가 감가상각 없음).<br>`+
-    `<b>⚠ 초과분이 연체이자·지연손해금이라면</b> - 사용권자산 가산이 아니라 <b>발생 기간 비용</b>입니다. i02에는 리스료만 넣고 연체이자는 빼서 별도 전표로 처리하십시오. 당사자가 합의해 리스료를 증액한 경우만 [리스변경] 탭(재측정)으로 보냅니다.<br>`+
-    `<b>⚠ 변동리스료라면(초과주행료·관리비·실적연동분 등)</b> - 리스부채 측정에 포함되지 않은 변동리스료는 <b>발생한 기간의 당기비용</b>이 원칙입니다(문단 38(b)). 그렇게 처리하려면 <b>i02에 그 변동증액분을 뺀 금액(계약상 리스료분)만 올리고</b>, 차액은 <b>별도 비용전표</b>로 처리하십시오 - 그러면 이 도구는 초과납으로 잡지 않습니다. i02에 실제 납부액 전액을 올리면 지금처럼 <b>사용권자산 가산</b>으로 처리됩니다.</div>`;
+    `<b>⚠ 변동리스료라면(초과주행료·관리비·실적연동분 등)</b> - 리스부채 측정에 포함되지 않은 변동리스료는 <b>발생한 기간의 당기비용</b>이 원칙입니다(문단 38(b)). 그렇게 처리하려면 <b>i02에 그 변동증액분을 뺀 금액(계약상 리스료분)만 올리고</b>, 차액은 <b>별도 비용전표</b>로 처리하십시오 - 그러면 이 도구는 초과납으로 잡지 않습니다. i02에 실제 납부액 전액을 올리면 지금처럼 <b>사용권자산 가산</b>으로 처리됩니다.</details></div>`;
 }
-// i02 반영 전(계약상) vs 후(실제) - 결산일 기준 사용권자산·리스부채·이자 전후 비교
+// 실제 납부 반영 전(계약상) vs 후(실제) - 결산일 기준 사용권자산·리스부채·이자 전후 비교
 function pdiffCompare(I,asof){
   const res=(I.startmode==='daily'?computeDaily(I):compute(I)), m=asofMetrics(res,asof);   // 반영 전 = 표시 BS 그대로
   const adj=pdAdjustment(I, actualPays(), asof);   // 선납/지연 FM델타 + 총액 초과납(ROU 가산)
@@ -1864,10 +1878,9 @@ function pdiffCompare(I,asof){
     return `<tr><td class="l">${r[0]}</td><td>${won(r[1])}</td><td>${won(r[2])}</td>`+
       `<td class="l" style="${chg?'color:#c00000;font-weight:600':'color:#999'}">${chg?(d>=0?'▲ +':'▼ −')+won(Math.abs(d)):'0'}</td></tr>`; }).join('');
   const odN=(adj.overdueCur>=1)?`<div class="note" style="color:#7a5b00;margin-top:4px">※ 미지급(지연·미납) <b>${won(adj.overdueCur)}</b>을 <b>유동</b>으로 분류했습니다 - 도래했거나 12개월 내 도래하는 미납분은 지급 연기권이 없어 유동(K-IFRS 1001). 부채 합계는 불변.</div>`:'';
-  return `<div class="note" style="margin:16px 0 6px;font-size:13px"><b>📊 i02 반영 전후 비교</b> · 결산일 ${fmtD(asof)} · 계약 <b>${I.id||'(현재)'}</b>`+
+  return `<div class="note" style="margin:16px 0 6px;font-size:13px"><b>📊 실제 납부 반영 전후 비교</b> · 결산일 ${fmtD(asof)} · 계약 <b>${I.id||'(현재)'}</b>`+
     (anyDiff?'':' <span style="color:#548235;font-weight:600">- 반영된 납부차이 없음(전후 동일)</span>')+`</div>`+
-    `<div class="tblbox" style="max-height:none"><table>`+thead(['항목','i02 반영 전','i02 반영 후','증감'])+body+`</table></div>`+
-    `<div class="note" style="color:#888;margin-top:4px">선납→리스부채 ↓, 지연→리스부채 ↑(계약 지급 누계와의 차이, 이자 불변). <b>총액이 같은 선납/지연이면 사용권자산·감가상각비는 변동 없음</b>이며, <b>누적 지급이 계약 총액을 넘는 초과분만</b> 사용권자산에 가산·잔여기간 상각됩니다.</div>`+
+    `<div class="tblbox" style="max-height:none"><table>`+thead(['항목','반영 전','반영 후','증감'])+body+`</table></div>`+
     odN+pdRateNote(I,adj)+(Math.abs(adj.rou)>=1?pdExcessNote(adj):'');
 }
 function renderPdiff(){
@@ -1889,26 +1902,26 @@ function renderPdiff(){
     `<button class="ghost" style="margin:0;width:auto;padding:8px 12px" onclick="dlI02('one')">자산별(현재 계약)</button>`+
     `<button class="ghost" style="margin:0;width:auto;padding:8px 12px" onclick="dlI02('all')">일괄(전체 ${nAll}건)</button>`+
     `<button class="ghost" style="margin:0;width:auto;padding:8px 12px" onclick="document.getElementById('i02file').click()">i02 업로드(일괄/자산별)</button>`+
-    (I02[I.id]?`<span class="badge" style="background:#eef7f0;color:#177245;border:1px solid #b7dcc2;align-self:center">이 계약 i02 반영됨</span>`:'')+`</div>`;
-  const ctrl=`<div class="note" style="margin:0 0 8px">회차별 <b>실제지급일·실제지급액</b>을 아래 표에서 직접 수정하거나, <b>i02 양식</b>(자산별=현재 계약 / 일괄=전체 계약)을 내려받아 작성 후 업로드하세요. 업로드 파일에 여러 리스ID가 있으면 <b>일괄 반영</b>됩니다(빈칸=계약상 금액). 결산일 ${fmtD(asof)} · 직전결산일 ${fmtD(prev)}(전년말) 기준 전기/당기 분리. <b>지급액에는 리스료만</b> 넣고 연체이자·지연손해금은 빼세요. 표에서 고친 값은 i02에 저장되어 요약과 결과 엑셀에도 반영됩니다.</div>`;
+    (I02[I.id]?`<span class="badge" style="background:#eef7f0;color:#177245;border:1px solid #b7dcc2;align-self:center">이 계약 실제 납부 반영됨</span>`:'')+`</div>`;
+  const ctrl=`<div class="note" style="margin:0 0 8px">표에서 고친 값은 i02에 저장되어 요약과 결과 엑셀에도 반영됩니다(빈칸=계약값). <b>지급액에는 리스료만</b> 넣고 연체이자·지연손해금은 빼세요. 당기는 ${fmtD(prev)} 다음날부터 ${fmtD(asof)}까지입니다.</div>`;
   const grid=`<div class="tblbox" style="max-height:300px"><table>`+thead(['회차','계약상지급일','실제지급일','실제지급액','차이(일·금액)'])+g+`</table></div>`;
   const multi=(LEASES&&LEASES.length>1), hasI02=!!(I02&&Object.keys(I02).length);
-  const detail=`<details open style="margin:10px 0"><summary style="cursor:pointer;font-weight:700;color:var(--navy);font-size:13px;padding:6px 0">이 계약 회차별 상세 · 직접 수정 (${ACTUAL.length}회) - 실제지급일·금액을 여기서 고칠 수 있습니다 (클릭하면 접기)</summary>`+
+  const detail=`<details open style="margin:10px 0"><summary style="cursor:pointer;font-weight:700;color:var(--navy);font-size:13px;padding:6px 0">이 계약 회차별 표 (${ACTUAL.length}회) - 실제지급일·금액을 고칠 수 있습니다</summary>`+
     ctrl+grid+io+`</details>`;
-  // 전체 뷰(★ i02 반영 결과) = 포트폴리오 판정·조정 내역만 / 단건 뷰(개별 계약 선택) = 그 계약만
+  // 전체 뷰(★ 실제 납부 반영 결과) = 포트폴리오 판정·조정 내역만 / 단건 뷰(개별 계약 선택) = 그 계약만
   if(multi && hasI02 && PDVIEW==='all') return i02Digest(asof,prev);
-  const back=multi?`<button class="ghost" style="margin:0 8px 0 0;width:auto;padding:5px 10px;font-size:12px" onclick="pdViewAll()">◀ 전체 i02 결과</button>`:'';
+  const back=multi?`<button class="ghost" style="margin:0 8px 0 0;width:auto;padding:5px 10px;font-size:12px" onclick="pdViewAll()">◀ 실제 납부 전체 결과</button>`:'';
   const head=`<div class="note" style="margin:0 0 8px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">`+
     back+`<b>▸ 계약별 상세</b> - 계약 선택:${pdLeaseSelect(I.id)||' <b>'+(I.id||'(현재 계약)')+'</b>'}</div>`;
   return head+((!multi&&hasI02)?i02Digest(asof,prev,true):'')+pdOneCard(I,asof)+pdiffCompare(I,asof)+`<div id="pdiff_summary">`+pdiffSummary(I,asof,prev)+`</div>`+detail;
 }
 // ===== 작업상태 저장·복원 (새로고침·브라우저 종료 대비) =====
-// 저장 대상: i01 계약목록(화면 수정 포함)·i02·비정액 승격·재측정 저장·미달 처리·유형 지정·입력폼·결산일
+// 저장 대상: i01 계약목록(화면 수정 포함)·i02·비정액 전환·재측정 저장·미달 처리·유형 지정·입력폼·결산일
 const SS_KEY='leaseCalc.session.v2';
 const SS_FORM=['lease_id','commencement','term','rate','payment','ul','freq','timing','conv','startmode',
   'prepaid','incentive','idc','restore','dep_face','dep_rate','dep_n','end_date','term_fee','red_date','red_pct','red_rate','cutoff','asof','fystart'];
 // 산출물 추적성용 도구 버전 - 계산 로직·산출물 와꾸가 바뀌면 올린다(결과엑셀 [전제·가정] 시트에 찍힌다).
-const TOOL_VER='2026.11-r6';   // r6: 상단 금액을 최종 기준으로, 표에서 고친 값을 i02에 저장, 검토 확인, 적요를 달력 월로(금액 계산 규칙은 r5와 같음, 2026-11-06 사용자 결정) / r5: i02 전 경로 계약 할인율 유지(IRR·계약 이율 굴림 대신 지급 누계 차이만 조정), 12개월 내 도래 미지급분 유동(2026-11-06 사용자 결정) /   // r3: 4에이전트 정밀점검 반영 - 변동 k순 처리·해지후 변동 무효화·이월 보증금율 명시·ROU 음수 캡·상각종료후 즉시인식·재측정 병합 현할차/꼬리(코워크 2026-07-28)
+const TOOL_VER='2026.11-r7';   // r7: 검증 탭 판정(최초 부채의 1%), 전문 용어를 쉬운 말로, 화면 정리(금액 규칙은 r5와 같음, 2026-11-07 사용자 결정) / r6: 상단 금액을 최종 기준으로, 표에서 고친 값을 i02에 저장, 검토 확인, 적요를 달력 월로(금액 계산 규칙은 r5와 같음, 2026-11-06 사용자 결정) / r5: i02 전 경로 계약 할인율 유지(IRR·계약 이율 굴림 대신 지급 누계 차이만 조정), 12개월 내 도래 미지급분 유동(2026-11-06 사용자 결정) /   // r3: 4에이전트 정밀점검 반영 - 변동 k순 처리·해지후 변동 무효화·이월 보증금율 명시·ROU 음수 캡·상각종료후 즉시인식·재측정 병합 현재가치할인차금/꼬리(코워크 2026-07-28)
 // 작업상태 스키마 버전 - 저장 항목(열·필드)이 늘면 반드시 올린다.
 // v2: 22열(축소일·축소비율) / v3: 23열 축소 수정할인율 + 회계연도 개시월(fystart)
 // v4: 검토 확인(reviewed)
@@ -1973,7 +1986,7 @@ function sessionReset(){
   const NL=String.fromCharCode(10);
   const n=(LEASES||[]).length, ni=Object.keys(I02||{}).length;
   if(!confirm('새 작업을 시작합니다.'+NL+NL+
-    '· 불러온 계약 '+n+'건 · i02 '+ni+'건 · 비정액 승격 '+Object.keys(PMTS||{}).length+'건 · 재측정 저장 '+Object.keys(MODS||{}).length+'건 · 보증금 변동 '+Object.values(DEPS||{}).reduce((s,a)=>s+(a?a.length:0),0)+'건'+NL+
+    '· 불러온 계약 '+n+'건 · i02 '+ni+'건 · 비정액 전환 '+Object.keys(PMTS||{}).length+'건 · 재측정 저장 '+Object.keys(MODS||{}).length+'건 · 보증금 변동 '+Object.values(DEPS||{}).reduce((s,a)=>s+(a?a.length:0),0)+'건'+NL+
     '· 자동저장본도 함께 삭제됩니다'+NL+NL+
     '저장(.json)해 두지 않은 내용은 되돌릴 수 없습니다. 계속할까요?')) return;
   LEASES=[]; PICKED=null; I02={}; PMTS={}; DEPS={}; MODS={}; SHORT={}; OVR={}; REVIEWED={};
@@ -1985,6 +1998,7 @@ function sessionReset(){
     else el.value=''; });
   ['transfer','cap_dep','cap_int','prorate'].forEach(k=>{ const el=document.getElementById(k); if(el) el.checked=false; });
   ['pickwrap','i02wrap','curwrap'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add('hidden'); });
+  const xh0=document.getElementById('xlhint'); if(xh0) xh0.classList.remove('hidden');
   const sel=document.getElementById('leasepick'); if(sel) sel.innerHTML='';
   sessionClear();
   ['panel','stats','asofpanel','tabs','note'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
@@ -2007,7 +2021,7 @@ function sessionImport(ev){
       '현재 화면 내용을 덮어씁니다. 불러올까요?')) return;
     sessionApply(o);
     alert('작업상태를 불러왔습니다 - 계약 '+LEASES.length+'건'+String.fromCharCode(10)+
-      'i02 '+Object.keys(I02).length+'건 · 비정액 승격 '+Object.keys(PMTS).length+'건 · 재측정 저장 '+Object.keys(MODS).length+'건 · 보증금 변동 '+Object.values(DEPS||{}).reduce((s,a)=>s+(a?a.length:0),0)+'건'); };
+      'i02 '+Object.keys(I02).length+'건 · 비정액 전환 '+Object.keys(PMTS).length+'건 · 재측정 저장 '+Object.keys(MODS).length+'건 · 보증금 변동 '+Object.values(DEPS||{}).reduce((s,a)=>s+(a?a.length:0),0)+'건'); };
   fr.readAsText(f);
 }
 // 페이지 로드 시: 자동 복원하지 않고 배너로 확인(다른 회사 데이터가 뜨는 사고 방지)
@@ -2016,7 +2030,7 @@ function sessionBanner(){
   const d=document.createElement('div'); d.id='ssbar'; d.className='card';
   d.style.cssText='margin:0 0 14px;border-left:4px solid var(--navy2);background:#f5f8fc;display:flex;gap:10px;align-items:center;flex-wrap:wrap';
   d.innerHTML=`<b style="color:var(--navy)">직전 작업이 저장돼 있습니다</b>`+
-    `<span style="color:#555;font-size:12px">${o.saved} · 계약 ${o.leases.length}건 · i02 ${Object.keys(o.i02||{}).length}건 · 승격 ${Object.keys(o.pmts||{}).length}건</span>`+
+    `<span style="color:#555;font-size:12px">${o.saved} · 계약 ${o.leases.length}건 · i02 ${Object.keys(o.i02||{}).length}건 · 전환 ${Object.keys(o.pmts||{}).length}건</span>`+
     `<button class="ghost" style="margin:0;width:auto;padding:5px 11px;font-size:12px" onclick="sessionRestoreLast()">이어서 작업</button>`+
     `<button class="ghost" style="margin:0;width:auto;padding:5px 11px;font-size:12px" onclick="sessionClear()">삭제</button>`;
   const w=document.querySelector('.wrap'); if(w) w.insertBefore(d,w.firstChild);
@@ -2084,7 +2098,7 @@ function i02Classify(I){
       (postEnd>=1?` · <b class="bad">⚠ 해지일 이후 실제 납부 ${won(postEnd)}(${postEndCnt}회)</b>는 계산에 반영되지 않습니다 - 해지정산금(i01 20열) 또는 환급채권으로 별도 처리하세요`:'');
   }
   const preN=I02PRE[I.id]||0;   // 개시일 이전이라 무시된 i02 회차 - 이월 시 회차 체계가 어긋난 신호
-  if(preN) why+=` · <b class="bad">⚠ i02 ${preN}회차가 리스 개시일 이전 지급</b>이라 무시했습니다 - 재측정 재기준으로 이월된 계약이면 i02도 새 회차 체계로 다시 만들어야 합니다`;
+  if(preN) why+=` · <b class="bad">⚠ i02 ${preN}회차가 리스 개시일 이전 지급</b>이라 무시했습니다 - 재측정으로 이월된 계약이면 i02도 새 회차 체계로 다시 만들어야 합니다`;
   // 사용자가 유형을 직접 지정(OVR)하면 그 유형으로 라우팅한다 - 자동 판별은 근거에 남긴다
   const autoType=type, autoWhy=why;
   const o=OVR[I.id];
@@ -2147,10 +2161,10 @@ function finalBasis(T,o){   // o: pend(미확정 재측정)·need(검토 필요 
   if(other>0) warn.push(`검토 필요 ${other}건 남음`);
   if(o.overlap) warn.push(`재측정·해지·축소 겹침 ${o.overlap}건`);
   if(o.stale) warn.push(`재측정 저장 뒤 조건 변경 ${o.stale}건`);
-  const tail=(o.hasI02&&o.noI02)?`, i02 없는 계약 ${o.noI02}건은 계약대로 지급 가정`:'';
+  const tail=(o.hasI02&&o.noI02)?`, 실제 납부 자료가 없는 계약 ${o.noI02}건은 계약대로 지급 가정`:'';
   if(warn.length) return {cls:'warn',chip:'⚠ 잠정 금액',txt:warn.join(', ')+', 처리하면 금액이 바뀔 수 있음'+tail};
-  if(hP||hM) return {cls:'ok',chip:'최종 금액',txt:'계약상'+(hP?' + 실제 납부(i02) 조정':'')+(hM?' + 재측정 조정':'')+tail};
-  if(o.hasI02) return {cls:'ok',chip:'최종 금액',txt:'실제 납부(i02) 차이 없음, 계약상 금액과 같음'+tail};
+  if(hP||hM) return {cls:'ok',chip:'최종 금액',txt:'계약상'+(hP?' + 실제 납부 조정':'')+(hM?' + 재측정 조정':'')+tail};
+  if(o.hasI02) return {cls:'ok',chip:'최종 금액',txt:'실제 납부 차이 없음, 계약상 금액과 같음'+tail};
   return {cls:'plain',chip:'계약상 금액',txt:'실제 납부(i02) 없음, 계약대로 지급한 것으로 계산'};
 }
 function finalTilesHTML(T,plSub){
@@ -2186,7 +2200,7 @@ function pdTopLease(){
   const det=hasAdj?`<details style="margin-top:8px"${FINOPEN?' open':''} ontoggle="FINOPEN=this.open"><summary style="cursor:pointer;font-size:12px;color:var(--navy);font-weight:600">계약상에서 최종까지 내역 보기</summary><div style="margin-top:6px">${finalTableHTML(T,asof,fy)}</div>${finalOdNote(X.od)}</details>`:'';
   document.getElementById('asofpanel').innerHTML=topCardHTML(`결산일 현재 결산정보 · ${fmtD(asof)}`,
     finalBasis(T,{pend:pendingRemeasureIds([I]).length,need:needN,overlap:O.overlap.length,stale:O.stale.length,hasI02:!!(I02&&I02[I.id])}),
-    `${RES.mode==='daily'?'실제일 일할':'월말 간주'} 기준 · 유동=향후 12개월 · 손익=당기 ${fyRangeTxt(asof)}`,
+    `${RES.mode==='daily'?'실제일 일할':'월말 기준'} 기준 · 유동=향후 12개월 · 손익=당기 ${fyRangeTxt(asof)}`,
     finalTilesHTML(T,{intr:`개시 이후 누적 ${won(X.cum.intr)}`,dep:`개시 이후 누적 ${won(X.cum.dep)}`}),
     det+modCautionBox(O)+varPmtNote(RES)+depNote(RES)+redNote(RES)+termNote(RES),
     needChipHTML(needN,"setTab('pdiff')"));
@@ -2202,7 +2216,7 @@ function pdTopPortfolio(asof){
 // 단건 뷰 상단 - 이 계약의 판정·근거·처리(전체 표의 그 행만 떼어 온 것)
 function pdOneCard(I,asof){
   const c=(I02&&I02[I.id])?i02Classify(I):null;
-  if(!c) return `<div class="note" style="margin:0 0 8px">이 계약은 <b>i02가 없습니다</b> - 아래 회차별 표에서 실제지급일·금액을 직접 수정하거나 i02 양식을 올리세요.</div>`;
+  if(!c) return `<div class="note" style="margin:0 0 8px">이 계약은 <b>실제 납부 자료(i02)가 없습니다</b> - 아래 회차별 표에서 실제지급일·금액을 직접 수정하거나 i02 양식을 올리세요.</div>`;
   const COL={'증액':'#c00000','연장':'#c00000','혼합':'#c00000','감액':'#c00000','해지':'#c00000','초과납':'#7a5b00','미달':'#7a5b00','비정액':'#177245','선납/지연':'#177245','차이없음':'#999'};
   const need=i02NeedReview(I,c), multi=(LEASES&&LEASES.length>1);
   return `<div class="note" style="margin:0 0 10px;background:${need?'#fdf0f0':'#f5f8fc'};border:1px solid ${need?'#e0b0b0':'#dbe6f2'}">`+
@@ -2212,12 +2226,12 @@ function pdOneCard(I,asof){
     (c.overridden?`<span class="badge" style="background:#fff4d6;color:#7a5b00;border:1px solid #e0c060">사용자 지정</span>`:'')+
     (need?`<span class="badge" style="background:#fdecec;color:#c00000;border:1px solid #e0b0b0">확정 필요</span>`:'')+
     `</div><div style="margin-top:5px;font-size:12px;color:#555"><b>근거</b> ${c.why}</div>`+
-    (need?`<div style="margin-top:5px;font-size:12px;color:#8a2020">처리 방법은 ${multi?'<b>[◀ 전체 i02 결과]</b>의 ':'위 '}[검토 필요] 표에서 정할 수 있습니다.</div>`:'')+`</div>`;
+    (need?`<div style="margin-top:5px;font-size:12px;color:#8a2020">처리 방법은 ${multi?'<b>[◀ 실제 납부 전체 결과]</b>의 ':'위 '}[검토 필요] 표에서 정할 수 있습니다.</div>`:'')+`</div>`;
 }
 // [납부차이] 탭 안에서 계약 전환 - 상단 표의 리스ID 클릭 / 상세 헤더의 드롭다운 공용
 let PDVIEW='all';   // 'all'=포트폴리오 i02 결과 / 'one'=선택 계약만
 function pdPick(idx){ const i=parseInt(idx); if(isNaN(i)) return; pickLease(i); PDVIEW='one'; setTab('pdiff'); }
-function pdKeepView(keep){   // 검토 표에서 액션을 실행해도 보던 뷰(전체 i02 결과)를 유지
+function pdKeepView(keep){   // 검토 표에서 액션을 실행해도 보던 뷰(실제 납부 전체 결과)를 유지
   PDVIEW=keep;
   const s1=document.getElementById('leasepick');
   if(keep==='all'&&s1&&[...s1.options].some(o=>o.value==='__i02__')) s1.value='__i02__';
@@ -2229,7 +2243,7 @@ function pdIdLink(id){ if(!(LEASES&&LEASES.length>1)) return id||'';
 function pdLeaseSelect(curId){
   if(!(LEASES&&LEASES.length>1)) return '';
   return `<select style="padding:3px 8px;font-size:12px;width:auto;margin-left:4px" onchange="pdPick(this.value)">`+
-    LEASES.map((L,i)=>{ const id=L.lease_id||'', c=I02[id]?'':' · i02 없음';
+    LEASES.map((L,i)=>{ const id=L.lease_id||'', c=I02[id]?'':' · 실제 납부 없음';
       return `<option value="${i}"${id===curId?' selected':''}>${id}${c}</option>`; }).join('')+`</select>`;
 }
 // i02 업로드 결과 한눈에 - ① 요약 타일 ② 조치 필요 목록 ③ 자동 반영 목록(접기)
@@ -2278,9 +2292,9 @@ function i02Digest(asof,prev,needOnly){
           `<input type="date" id="${k}d" value="${dflt}" style="padding:3px 5px;font-size:11px;width:125px">`+
           `<input type="number" step="0.01" id="${k}p" value="${pct}" placeholder="비율%" style="padding:3px 5px;font-size:11px;width:72px;text-align:right">`+
           `<button class="ghost" style="margin:0;width:auto;padding:4px 9px;font-size:11px" onclick="setReduction('${(x.id||'').replace(/'/g,"\'")}',document.getElementById('${k}d').value,document.getElementById('${k}p').value)">축소 반영</button></div>`}; }
-    if(c.type==='비정액') return {t:'비정액 계약(지정)', d:'회차별 금액을 계약 자체로 보겠다고 지정하셨습니다 - 승격 방식을 골라 주세요.',
-      a:`<button class="ghost" style="margin:0 4px 0 0;width:auto;padding:4px 9px;font-size:11px" onclick="i02Promote('${(x.id||'').replace(/'/g,"\'")}','unit')">단가만 승격</button>`+
-        `<button class="ghost" style="margin:0;width:auto;padding:4px 9px;font-size:11px" onclick="i02Promote('${(x.id||'').replace(/'/g,"\'")}','all')">전체 승격</button>`};
+    if(c.type==='비정액') return {t:'비정액 계약(지정)', d:'회차별 금액을 계약 자체로 보겠다고 지정하셨습니다 - 전환 방식을 골라 주세요.',
+      a:`<button class="ghost" style="margin:0 4px 0 0;width:auto;padding:4px 9px;font-size:11px" onclick="i02Promote('${(x.id||'').replace(/'/g,"\'")}','unit')">단가만 전환</button>`+
+        `<button class="ghost" style="margin:0;width:auto;padding:4px 9px;font-size:11px" onclick="i02Promote('${(x.id||'').replace(/'/g,"\'")}','all')">전체 전환</button>`};
     return {t:'총액 미달', d:`실제 지급이 계약보다 <b>${won(-c.totDiff)}</b> 적습니다 - 연체인지, 깎아준 것인지, 계약이 원래 비정액인지 골라 주세요.`,
       a:`<select style="padding:3px 6px;font-size:11px;width:auto" onchange="setShortMode('${(x.id||'').replace(/'/g,"\'")}',this.value)">`+
         [['unpaid','연체·미납(기본)'],['rou','감면 → 사용권자산 차감'],['pl','감면 → 즉시 손익']].map(o=>`<option value="${o[0]}"${shortMode(x.I)===o[0]?' selected':''}>${o[1]}</option>`).join('')+
@@ -2293,14 +2307,14 @@ function i02Digest(asof,prev,needOnly){
       `<div class="tblbox" style="max-height:none"><table>`+thead(['리스ID','무엇이 다른가','왜 검토가 필요한가','처리'])+
       need.map(x=>{ const w=why(x); return `<tr><td class="l">${pdIdLink(x.id)}</td><td class="l" style="color:#c00000;font-weight:600">${w.t}</td><td class="l wrap" style="max-width:420px">${w.d}</td><td class="l">${w.a}</td></tr>`; }).join('')+
       `</table></div>`;
-  } else needBox=`<div class="note" style="background:#eef7f0;border:1px solid #b7dcc2;color:#177245;margin:0 0 8px"><b>■ 검토 필요 없음</b> - 올리신 i02는 전부 지급 시기·금액 차이라 도구가 자동 반영했습니다(아래 목록에서 계약별로 확인).</div>`;
+  } else needBox=`<div class="note" style="background:#eef7f0;border:1px solid #b7dcc2;color:#177245;margin:0 0 8px"><b>■ 검토 필요 없음</b> - 올리신 실제 납부 자료는 전부 지급 시기·금액 차이라 도구가 자동 반영했습니다(아래 목록에서 계약별로 확인).</div>`;
   if(needOnly) return need.length?needBox:'';
   const COL={'증액':'#c00000','연장':'#c00000','혼합':'#c00000','감액':'#c00000','축소':'#c00000','초과납':'#7a5b00','미달':'#7a5b00','선납/지연':'#177245','차이없음':'#999'};
   const done=x=>{ const c=x.c;
     if(c.type==='미달'&&shortMode(x.I)==='unpaid'&&!PMTS[x.id]) return `미납으로 확인함 - 미납액만큼 부채 유지 <a href="javascript:void(0)" style="color:var(--navy2);text-decoration:underline" onclick="i02Unreview('${(x.id||'').replace(/'/g,"\'")}')">확인 취소</a>`;
     if(c.type==='축소') return '범위 축소 반영 - 축소일 이후 비율만큼 제거(46(a))';
-    if(PMTS[x.id]) return '비정액 계약으로 승격 - 계약 자체가 그 금액';
-    if(c.saved) return '재측정 저장됨 - 변경일 이후는 i02에서 자동 제외';
+    if(PMTS[x.id]) return '비정액 계약으로 전환 - 계약 자체가 그 금액';
+    if(c.saved) return '재측정 저장됨 - 변경일 이후 실제 납부는 자동 제외';
     if(c.type==='미달') return (shortMode(x.I)==='rou'?'감면 → 사용권자산 차감':'감면 → 즉시 손익')+' 처리';
     if(c.type==='초과납') return '리스부채 조정 + 초과분 사용권자산 가산';
     return '리스부채만 조정(선납↓/지연↑), 이자 불변';
@@ -2321,16 +2335,15 @@ function i02Digest(asof,prev,needOnly){
     `<tr class="tot" style="font-weight:700;background:#eef2f7"><td class="l">합계 (${all.length}건)</td><td></td><td></td><td></td>`+
     `<td>${won(T.liab)}</td><td>${won(T.rou)}</td><td>${won(T.dep)}</td><td>${won(T.cash)}</td></tr>`;
   const nPro=Object.keys(PMTS).length;
-  const bulk=`<div class="note" style="margin:12px 0 6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">`+
-    `<b>비정액 계약 일괄 확정:</b>`+
-    `<button class="ghost" style="margin:0;width:auto;padding:5px 11px;font-size:12px" onclick="i02PromoteAll('unit')">▶ 단가만 일괄 승격</button>`+
-    `<button class="ghost" style="margin:0;width:auto;padding:5px 11px;font-size:12px" onclick="i02PromoteAll('all')">전체 일괄 승격</button>`+
-    (nPro?`<span class="badge" style="background:#eef7f0;color:#177245;border:1px solid #b7dcc2">승격 ${nPro}건</span><button class="ghost" style="margin:0;width:auto;padding:5px 11px;font-size:12px" onclick="i02DemoteAll()">일괄 해제</button>`:'')+
-    `<span style="color:#888;font-size:11px">단가만 = 무납월·몰아내기(자금사정 선납/지연)는 제외하고 <b>단가가 다른 회차만</b> 계약으로 확정 → 그 외 시기차이는 i02 조정분개로 유지</span></div>`;
-  const allBox=bulk+`<div class="note" style="margin:12px 0 6px;font-size:13px"><b>■ 계약별 조정 내역 (전체 ${all.length}건 · 당기)</b> - 결산일 ${fmtD(asof)}·직전결산일 ${fmtD(prev)} 기준. <b>판정 유형별로 정렬</b>했고(확정이 필요한 유형부터 · 같은 유형은 리스부채 증감 큰 순), <b>리스ID를 누르면</b> 그 계약 상세 화면으로 이동합니다(상세에서 [◀ 전체 i02 결과]로 복귀). i02 조정은 이자비용을 바꾸지 않습니다(계약 할인율 유지). 재측정을 확정하면 재측정 층에서 이자가 달라집니다.</div>`+
+  const bulk=`<details${nPro?' open':''} class="note" style="margin:8px 0 0"><summary style="cursor:pointer;font-weight:600">비정액 계약 일괄 전환</summary><div style="margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">`+
+    `<button class="ghost" style="margin:0;width:auto;padding:5px 11px;font-size:12px" onclick="i02PromoteAll('unit')">▶ 단가만 일괄 전환</button>`+
+    `<button class="ghost" style="margin:0;width:auto;padding:5px 11px;font-size:12px" onclick="i02PromoteAll('all')">전체 일괄 전환</button>`+
+    (nPro?`<span class="badge" style="background:#eef7f0;color:#177245;border:1px solid #b7dcc2">전환 ${nPro}건</span><button class="ghost" style="margin:0;width:auto;padding:5px 11px;font-size:12px" onclick="i02DemoteAll()">일괄 해제</button>`:'')+
+    `<span style="color:#888;font-size:11px">단가만 = 무납월·몰아내기(자금사정 선납/지연)는 제외하고 <b>단가가 다른 회차만</b> 계약으로 확정합니다. 그 외 시기 차이는 실제 납부 조정분개로 남습니다.</span></div></details>`;
+  const allBox=`<div class="note" style="margin:12px 0 6px;font-size:13px"><b>■ 계약별 조정 내역 (전체 ${all.length}건 · 당기)</b> - ${fmtD(prev)} 다음날부터 ${fmtD(asof)}까지. 확정이 필요한 유형부터 정렬했고, 리스ID를 누르면 그 계약 상세로 갑니다. 실제 납부 조정은 이자비용을 바꾸지 않습니다.</div>`+
     `<div class="tblbox" style="max-height:none"><table>`+thead(['리스ID','판정(변경 가능)','판단 근거','처리','리스부채 증감','사용권자산 증감','감가상각비 증감','현금 증감'])+body+`</table></div>`+
-    `<div class="note" style="color:#888;margin-top:4px"><b>판정을 바꿔도 오류가 나지 않습니다</b> - 바꾸면 그 유형의 처리 경로로 라우팅되고, 추가 확정이 필요한 유형(증액·연장·감액=재측정 / 해지=해지일 / 미달=처리 선택 / 비정액=승격)은 위 <b>[검토 필요]</b> 표에 올라옵니다. 데이터가 그 유형과 맞지 않으면 확정 단계에서 이유를 알려줍니다. [↺ 자동 판별로]로 되돌아갑니다.</div>`;
-  return `<div class="note" style="margin:0 0 6px;font-size:13px"><b>📥 i02 반영 결과</b> · 결산일 ${fmtD(asof)} · 대상 ${items.length}건 `+
+    `<details class="note" style="margin-top:4px"><summary style="cursor:pointer;font-weight:600">판정을 바꾸면 어떻게 되나요</summary>바꿔도 오류가 나지 않습니다. 그 유형의 처리 경로로 가고, 추가 확정이 필요한 유형(증액·연장·감액=재측정 / 해지=해지일 / 미달=처리 선택 / 비정액=전환)은 위 <b>[검토 필요]</b> 표에 올라옵니다. 데이터가 그 유형과 맞지 않으면 확정 단계에서 이유를 알려 줍니다. [↺ 자동 판별로]로 되돌아갑니다.</details>`+bulk;
+  return `<div class="note" style="margin:0 0 6px;font-size:13px"><b>📥 실제 납부 반영 결과</b> · 결산일 ${fmtD(asof)} · 대상 ${items.length}건 `+
     `<span style="font-weight:400;color:#888;font-size:11px">(판별 기준 = 잔여(미래) 지급 스케줄이 바뀌었나 - 과거만 다르면 부채 조정, 미래가 바뀌면 재측정)</span></div>`+
     strip+needBox+allBox;
 }
@@ -2350,9 +2363,9 @@ function i02RoutePanel(){
   const esc=s=>String(s||'').replace(/'/g,"\\'");
   const body=rows.map(r=>{ const c=r.c;
     let act;
-    if(PMTS[r.id]) act=`<span class="badge" style="background:#eef7f0;color:#177245;border:1px solid #b7dcc2">비정액 계약 승격됨</span> <button class="ghost" style="margin:0;width:auto;padding:4px 9px;font-size:11px" onclick="i02Demote('${esc(r.id)}')">해제</button>`;
+    if(PMTS[r.id]) act=`<span class="badge" style="background:#eef7f0;color:#177245;border:1px solid #b7dcc2">비정액 계약 전환됨</span> <button class="ghost" style="margin:0;width:auto;padding:4px 9px;font-size:11px" onclick="i02Demote('${esc(r.id)}')">해제</button>`;
     else if(c.remeasure) act=c.saved
-      ? `<span class="badge" style="background:#eef7f0;color:#177245;border:1px solid #b7dcc2">재측정 저장됨 - i02 금액 자동 제외</span> <button class="ghost" style="margin:0;width:auto;padding:4px 9px;font-size:11px" onclick="i02ToMod('${(r.id||'').replace(/'/g,"\\'")}')">다시 열기</button>`
+      ? `<span class="badge" style="background:#eef7f0;color:#177245;border:1px solid #b7dcc2">재측정 저장됨 - 실제 납부 금액 자동 제외</span> <button class="ghost" style="margin:0;width:auto;padding:4px 9px;font-size:11px" onclick="i02ToMod('${(r.id||'').replace(/'/g,"\\'")}')">다시 열기</button>`
       : `<button class="ghost" style="margin:0;width:auto;padding:5px 10px;font-size:12px" onclick="i02ToMod('${(r.id||'').replace(/'/g,"\\'")}')">▶ 재측정 탭에서 확정</button>`;
     else if(c.type==='미달'||c.type==='초과납') act=(c.type==='미달'
         ? `<span style="color:#666;font-size:11px">미달분 처리: </span><select style="padding:3px 6px;font-size:11px;width:auto" onchange="setShortMode('${esc(r.id)}',this.value)">`+
@@ -2360,21 +2373,21 @@ function i02RoutePanel(){
             .map(o=>`<option value="${o[0]}"${(SHORT[r.id]||'unpaid')===o[0]?' selected':''}>${o[1]}</option>`).join('')+`</select>`
         : `<span style="color:#7a5b00">부채 조정 + 초과분 사용권자산 가산(자동)</span>`)+
       `<br><span style="color:#666;font-size:11px">계약이 원래 비정액이면 → </span>`+
-      `<button class="ghost" style="margin:4px 4px 0 0;width:auto;padding:4px 9px;font-size:11px" onclick="i02Promote('${esc(r.id)}','unit')">단가만 승격</button>`+
-      `<button class="ghost" style="margin:4px 0 0;width:auto;padding:4px 9px;font-size:11px" onclick="i02Promote('${esc(r.id)}','all')">전체 승격</button>`;
+      `<button class="ghost" style="margin:4px 4px 0 0;width:auto;padding:4px 9px;font-size:11px" onclick="i02Promote('${esc(r.id)}','unit')">단가만 전환</button>`+
+      `<button class="ghost" style="margin:4px 0 0;width:auto;padding:4px 9px;font-size:11px" onclick="i02Promote('${esc(r.id)}','all')">전체 전환</button>`;
     else if(c.type==='초과납') act='<span style="color:#177245">부채 조정 + 초과분 사용권자산 가산(자동)</span>';
     else act='<span style="color:#177245">부채 조정(자동 반영됨)</span>';
     return `<tr><td class="l">${r.id||''}</td><td class="l" style="color:${COL[c.type]||'#333'};font-weight:600">${c.type}</td><td class="l">${c.why}</td><td class="l">${act}</td></tr>`; }).join('');
-  return `<div class="note" style="margin:0 0 8px"><b>■ i02 자동 판별 (${rows.length}건)</b> - 판별 기준은 <b>"잔여(미래) 지급 스케줄이 바뀌었나"</b>입니다. `+
-    `과거만 다르면 <b>부채 조정(i02)</b>, 미래 금액↑=<b>증액</b>·회차↑=<b>연장</b>이면 <b>재측정</b>(문단 44~46) 대상입니다.`+
-    (nRe?` <b style="color:#c00000">재측정 대상 ${nRe}건</b> - 변경유효일·할인율은 자동 확정하지 않으니 프리필 후 직접 확인하세요.`:'')+`</div>`+
+  return `<div class="note" style="margin:0 0 8px"><b>■ 실제 납부 자동 판별 (${rows.length}건)</b> - 판별 기준은 <b>"잔여(미래) 지급 스케줄이 바뀌었나"</b>입니다. `+
+    `과거만 다르면 <b>부채 조정</b>, 미래 금액↑=<b>증액</b>·회차↑=<b>연장</b>이면 <b>재측정</b>(문단 44~46) 대상입니다.`+
+    (nRe?` <b style="color:#c00000">재측정 대상 ${nRe}건</b> - 변경유효일·할인율은 자동 확정하지 않으니 채운 뒤 직접 확인하세요.`:'')+`</div>`+
     `<div class="tblbox" style="max-height:none"><table>`+thead(['리스ID','판정','근거','처리'])+body+`</table></div>`+
-    (nRe?`<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;margin:0 0 10px"><b>⚠ 재측정 대상은 확정 전까지 i02가 '초과납'(증액·연장)·'총액 미달'(감액)로 잡습니다</b> - [▶ 재측정 탭에서 확정]→할인율 확정→<b>[✅ 재측정 확정]</b>까지 마치면 그 리스의 변경유효일 이후 i02 금액은 자동으로 제외되어 이중계상되지 않습니다.</div>`:'')+
+    (nRe?`<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;margin:0 0 10px"><b>⚠ 재측정 대상은 확정 전까지 실제 납부가 '초과납'(증액·연장)·'총액 미달'(감액)로 잡습니다</b> - [▶ 재측정 탭에서 확정]→할인율 확정→<b>[✅ 재측정 확정]</b>까지 마치면 그 리스의 변경유효일 이후 실제 납부 금액은 자동으로 제외되어 이중계상되지 않습니다.</div>`:'')+
     (endCands.length?`<div class="note" style="background:#fdf0f0;border:1px solid #e0b0b0;color:#8a2020;margin:0 0 10px"><b>■ 중도해지 후보 ${endCands.length}건</b> - ${endCands.join(' · ')}<br>`+
       `마지막 지급 이후 회차가 계속 무납입니다. <b>중도해지라면 좌측 [중도해지] 칸에 해지일</b>(+정산금)을 넣으세요 - 해지월까지 인식 후 잔여 부채·자산을 제거합니다. 단순 무납월(미지급)이면 그대로 두시면 됩니다. <b>무납월과 해지는 지급내역만으로 구분할 수 없어 자동 확정하지 않습니다.</b></div>`:'');
 }
-// i02 금액을 '계약 스케줄'로 승격 - 회차마다 리스료가 다른 비정액 계약을 i01 단일 리스료로 못 담는 한계 해소.
-// 승격하면 그 금액이 계약(부채·이자·상각의 기준)이 되어 초과납·총액미달 판정이 사라진다. 날짜(선납/지연)는 i02가 계속 담당.
+// i02 금액을 '계약 스케줄'로 전환 - 회차마다 리스료가 다른 비정액 계약을 i01 단일 리스료로 못 담는 한계 해소.
+// 전환하면 그 금액이 계약(부채·이자·상각의 기준)이 되어 초과납·총액미달 판정이 사라진다. 날짜(선납/지연)는 i02가 계속 담당.
 // mode='unit'(기본): 0원(무납월)·계약액 초과(몰아내기)는 타이밍으로 보고 제외, **부분 금액 회차만** 계약 단가로 반영
 // mode='all'  : i02 전 회차를 그대로 계약으로 (지급 스케줄 자체가 계약인 경우 - 무납월도 계약으로 굳음)
 // 검토 표에서 해지일을 바로 반영 - i01의 '해지일·해지정산금' 칸에 그대로 기록되므로
@@ -2424,7 +2437,7 @@ function setEndDate(id,d,fee){
       NL+NL+'i01의 해지일 칸에 기록됐습니다 - 요약·상각표·분개장·결과엑셀·차기 i01 생성에 모두 반영됩니다.'
     : '해지일이 적용되지 않았습니다 - '+(RES.termWarn||'날짜를 확인하세요.'));
 }
-// 승격 금액맵 산출(단건·일괄 공용) - 현재 계약조건(pmtVec) 대비 i02 금액을 mode 규칙으로 반영
+// 전환 금액맵 산출(단건·일괄 공용) - 현재 계약조건(pmtVec) 대비 i02 금액을 mode 규칙으로 반영
 function buildPmtMap(I,mode){
   const ov=I02[I.id]||{}, mpp=12/FREQ[I.freq], n=Math.floor(I.term/mpp), P=pmtVec(I), map={};
   let nDiff=0, tot=0, skipped=0;
@@ -2434,7 +2447,7 @@ function buildPmtMap(I,mode){
     map[s]=a; tot+=a; if(Math.round(a)!==Math.round(P[s-1])) nDiff++; }
   return {map, nDiff, tot, skipped, n};
 }
-// 일괄 승격 - 자금사정 선납/지연(무납월·몰아내기)은 제외하고 '단가가 다른 회차'만 계약으로 확정
+// 일괄 전환 - 자금사정 선납/지연(무납월·몰아내기)은 제외하고 '단가가 다른 회차'만 계약으로 확정
 function i02PromoteAll(mode){
   mode=mode||'unit';
   const keep=PDVIEW;
@@ -2445,14 +2458,14 @@ function i02PromoteAll(mode){
     const r=buildPmtMap(I,mode); if(r.nDiff) cand.push({I, r});
   });
   const NL=String.fromCharCode(10);
-  if(!cand.length){ alert('일괄 승격할 대상이 없습니다.'+NL+'(이미 승격됐거나, '+(mode==='unit'?'단가가 다른 회차':'계약과 다른 금액')+'가 없는 계약뿐입니다.)'); return; }
+  if(!cand.length){ alert('일괄 전환할 대상이 없습니다.'+NL+'(이미 전환됐거나, '+(mode==='unit'?'단가가 다른 회차':'계약과 다른 금액')+'가 없는 계약뿐입니다.)'); return; }
   const before=cand.map(c=>{ const res=(c.I.startmode==='daily'?computeDaily(c.I):compute(c.I)), m=asofMetrics(res,asof);
     return {liab:m.liab, rou:m.rou}; });
-  const msg='일괄 승격 - '+(mode==='unit'?'단가만(무납월·몰아내기 제외)':'전체(지급 스케줄 그대로)')+NL+NL+
+  const msg='일괄 전환 - '+(mode==='unit'?'단가만(무납월·몰아내기 제외)':'전체(지급 스케줄 그대로)')+NL+NL+
     '대상 '+cand.length+'건 · 바뀌는 회차 합계 '+cand.reduce((s,c)=>s+c.r.nDiff,0)+'개'+
-    (mode==='unit'?NL+'제외(지급 타이밍) '+cand.reduce((s,c)=>s+c.r.skipped,0)+'회 - i02 조정분개로 계속 처리됩니다.':'')+
+    (mode==='unit'?NL+'제외(지급 타이밍) '+cand.reduce((s,c)=>s+c.r.skipped,0)+'회 - 실제 납부 조정분개로 계속 처리됩니다.':'')+
     NL+NL+'· '+cand.slice(0,8).map(c=>(c.I.id||'')+' ('+c.r.nDiff+'회)').join(NL+'· ')+(cand.length>8?NL+'· … 외 '+(cand.length-8)+'건':'')+
-    NL+NL+'승격은 개시일부터 소급 적용됩니다(전기 숫자와 달라질 수 있음). 진행할까요?';
+    NL+NL+'전환은 개시일부터 소급 적용됩니다(전기 숫자와 달라질 수 있음). 진행할까요?';
   if(!confirm(msg)) return;
   cand.forEach(c=>{ PMTS[c.I.id]=c.r.map; });
   ACTUAL_KEY=null;
@@ -2463,13 +2476,13 @@ function i02PromoteAll(mode){
   cand.forEach((c,i)=>{ const I2=(LEASES&&LEASES.length)?LEASES.map(leaseToI).find(x=>x.id===c.I.id):c.I;
     const res=(I2.startmode==='daily'?computeDaily(I2):compute(I2)), m=asofMetrics(res,asof);
     dL+=m.liab-before[i].liab; dR+=m.rou-before[i].rou; });
-  alert('일괄 승격 완료 - '+cand.length+'건'+NL+NL+'결산일 '+fmtD(asof)+' 기준 변동'+NL+
+  alert('일괄 전환 완료 - '+cand.length+'건'+NL+NL+'결산일 '+fmtD(asof)+' 기준 변동'+NL+
     '· 리스부채 '+won(R(dL))+NL+'· 사용권자산 '+won(R(dR))+NL+NL+
-    '계약별 [승격 전/후] 비교는 각 계약의 [리스부채 상각표]·[결산 분개장] 탭에서 볼 수 있습니다.');
+    '계약별 [전환 전/후] 비교는 각 계약의 [리스부채 상각표]·[결산 분개장] 탭에서 볼 수 있습니다.');
 }
 function i02DemoteAll(){
-  const ids=Object.keys(PMTS); if(!ids.length){ alert('승격된 계약이 없습니다.'); return; }
-  if(!confirm('승격된 '+ids.length+'건을 모두 해제하고 정기리스료(정액)로 되돌립니다.')) return;
+  const ids=Object.keys(PMTS); if(!ids.length){ alert('전환된 계약이 없습니다.'); return; }
+  if(!confirm('전환된 '+ids.length+'건을 모두 해제하고 정기리스료(정액)로 되돌립니다.')) return;
   const keep=PDVIEW; PMTS={}; ACTUAL_KEY=null;
   const pick=(PICKED!=null&&LEASES[PICKED])?PICKED:0;
   if(LEASES&&LEASES.length) pickLease(pick); else calc();
@@ -2483,21 +2496,21 @@ function i02Promote(id,mode){
   if(idx>=0) pickLease(idx); else if(!RES||RES.I.id!==id){ alert('리스를 찾을 수 없습니다: '+id); return; }
   const I=RES.I;
   const R0=buildPmtMap(I,mode), map=R0.map, n=R0.n; let nDiff=R0.nDiff, tot=R0.tot, skipped=R0.skipped;
-  if(!nDiff){ alert('반영할 단가 차이가 없습니다.'+(skipped?'\n(무납월·몰아내기 '+skipped+'회는 지급 타이밍으로 보아 제외했습니다 - 계약 자체를 그렇게 굳히려면 [전체 승격]을 쓰세요.)':'')); return; }
+  if(!nDiff){ alert('반영할 단가 차이가 없습니다.'+(skipped?'\n(무납월·몰아내기 '+skipped+'회는 지급 타이밍으로 보아 제외했습니다 - 계약 자체를 그렇게 굳히려면 [전체 전환]을 쓰세요.)':'')); return; }
   const uniq=[...new Set(Object.values(map).map(v=>Math.round(v)))];
-  const head=(mode==='unit')?'i02의 **부분 금액 회차만** 계약 단가로 반영합니다.':'i02 전 회차를 그대로 계약 스케줄로 승격합니다.';
+  const head=(mode==='unit')?'i02의 **부분 금액 회차만** 계약 단가로 반영합니다.':'i02 전 회차를 그대로 계약 스케줄로 전환합니다.';
   if(!confirm('「'+id+'」 - '+head+'\n\n· 계약과 달라지는 회차 '+nDiff+'개 / 전체 '+n+'개\n'+
-    (mode==='unit'?'· 무납월·몰아내기 '+skipped+'회는 제외(지급 타이밍 → i02가 계속 처리)\n':'')+
+    (mode==='unit'?'· 무납월·몰아내기 '+skipped+'회는 제외(지급 시기 차이는 실제 납부 조정으로 계속 처리)\n':'')+
     '· 계약 총액 '+won(tot)+' (단가 종류 '+uniq.length+'가지)\n\n리스부채·이자·사용권자산이 이 금액으로 재계산됩니다.')) return;
   PMTS[id]=map; ACTUAL_KEY=null;
   if(idx>=0) pickLease(idx); else calc();
   pdKeepView(keep); setTab('pdiff');
-  alert('승격 완료 - 「'+id+'」는 이제 비정액 계약으로 계산됩니다.\n리스부채(최초) '+won(RES.liability)+' · 사용권자산 '+won(RES.rou)+
+  alert('전환 완료 - 「'+id+'」는 이제 비정액 계약으로 계산됩니다.\n리스부채(최초) '+won(RES.liability)+' · 사용권자산 '+won(RES.rou)+
     '\n\n차기 결산에 이어가려면 [차기 결산 i01 생성]으로 내려받으세요(리스료스케줄 시트에 저장됩니다).');
 }
 function i02Demote(id){
   if(!PMTS[id]) return;
-  if(!confirm('「'+id+'」의 비정액 계약 승격을 해제하고 정기리스료(정액)로 되돌립니다.')) return;
+  if(!confirm('「'+id+'」의 비정액 계약 전환을 해제하고 정기리스료(정액)로 되돌립니다.')) return;
   const keep=PDVIEW;
   delete PMTS[id]; ACTUAL_KEY=null;
   const idx=(LEASES||[]).findIndex(L=>String(L.lease_id||'')===id);
@@ -2524,7 +2537,7 @@ function i02ToMod(id){
   const r=modFromRows(I,RES,rows,'','');
   if(!r.ok){ alert(r.msg); return; }
   setTab('modify');
-  alert('i02 → 재측정 프리필 완료 - 유형 '+r.tl+', 변경유효일 '+r.mdStr+', 변경후 지급 '+r.nAfter+'회'+(r.uniform?'(정액)':'(비정액)')+'.'+
+  alert('i02 → 재측정 칸 채움 완료 - 유형 '+r.tl+', 변경유효일 '+r.mdStr+', 변경후 지급 '+r.nAfter+'회'+(r.uniform?'(정액)':'(비정액)')+'.'+
     '\n▶ 변경유효일과 변경사유(재협상=수정 할인율 / 지수·요율=최초율)를 확인하고 [✔ 수정 할인율 확정] 후, 이중계상 방지를 위해 [✅ 재측정 확정]까지 눌러 주세요.');
 }
 // ===== i02 납부일정 양식 다운로드/업로드 (배치 i02 라운드트립 호환) =====
@@ -2536,7 +2549,7 @@ function dlI02(scope){
   else { leases = (LEASES&&LEASES.length)? LEASES.map(leaseToI) : (RES?[RES.I]:[getInputs()]); }
   const valid=leases.filter(I=>I.cy&&I.term>0&&I.payment>0);
   if(!valid.length){alert('먼저 계약정보를 입력/불러오세요.');return;}
-  // 현재 반영값 프리필 - 업로드된 i02 + 화면에서 고친 회차를 그대로 담아, 다음 결산엔 새 회차만 추가하면 되게 한다
+  // 현재 반영값 자동 채움 - 업로드된 i02 + 화면에서 고친 회차를 그대로 담아, 다음 결산엔 새 회차만 추가하면 되게 한다
   const hasAny=!!(I02&&Object.keys(I02).length);
   const aoa=[[hasAny
       ? "리스 납부차이 - 현재 반영된 실제 납부내역이 채워져 있습니다(계약과 다른 회차는 노랑). 새 회차만 고쳐 다음 결산에 그대로 올리세요. 지급액에는 리스료만 넣습니다(연체이자·지연손해금 제외). (여러 계약 일괄 · 리스ID로 구분)"
@@ -2607,7 +2620,7 @@ function pdAllSummary(asof,prev){
   body+=`<tr class="tot" style="font-weight:700;background:#eef2f7"><td class="l">합계 (${rows.length}건)</td><td></td><td></td><td>${won(tI)}</td><td>${won(tL)}</td><td>${won(tR)}</td><td>${won(tD)}</td><td>${won(tC)}</td></tr>`;
   return `<div class="note" style="margin-top:16px"><b>■ 전체 계약 납부차이 조정 합계 (일괄 · 당기)</b> - 결산일 ${fmtD(asof)}·직전결산일 ${fmtD(prev)} 기준. <b>리스ID를 누르면</b> 아래 [계약별 상세]로 이동합니다. <b>사용권자산 증감</b>은 총액 초과납(비환급 추가 대가) 가산분입니다.</div>`+
     `<div class="tblbox" style="max-height:none"><table>`+thead(['리스ID','조정 유형(변경 가능)','판단 근거','이자비용 증감','리스부채 증감','사용권자산 증감','감가상각비 증감','현금 증감'])+body+`</table></div>`+
-    `<div class="note" style="color:#888;margin-top:4px"><b>조정 유형별로 정렬</b>했습니다(판단이 필요한 유형부터 · 같은 유형 안에서는 리스부채 증감 큰 순). <b>유형을 바꿔도 오류가 나지 않습니다</b> - 바꾸면 그 유형의 처리 경로로 라우팅되고, 추가 확정이 필요한 유형(증액·연장·감액=재측정 / 해지=해지일 / 미달=처리 선택 / 비정액=승격)은 <b>위 [검토 필요] 표에 올라옵니다</b>. 데이터가 그 유형과 맞지 않으면 확정 단계에서 이유를 알려줍니다. [↺ 자동 판별로]를 고르면 되돌아갑니다.</div>`;
+    `<div class="note" style="color:#888;margin-top:4px"><b>조정 유형별로 정렬</b>했습니다(판단이 필요한 유형부터 · 같은 유형 안에서는 리스부채 증감 큰 순). <b>유형을 바꿔도 오류가 나지 않습니다</b> - 바꾸면 그 유형의 처리 경로로 가고, 추가 확정이 필요한 유형(증액·연장·감액=재측정 / 해지=해지일 / 미달=처리 선택 / 비정액=전환)은 <b>위 [검토 필요] 표에 올라옵니다</b>. 데이터가 그 유형과 맞지 않으면 확정 단계에서 이유를 알려줍니다. [↺ 자동 판별로]를 고르면 되돌아갑니다.</div>`;
 }
 function _toYMD(v){ if(v instanceof Date) return xlYMD(v);   // 직렬날짜 하루당김 보정 공용
   if(v==null||v==='') return '';
@@ -2631,19 +2644,11 @@ function parseI02(wb){
   if(!cnt){ alert('읽을 납부회차가 없습니다(3행부터 리스ID·회차 입력).'); return; }
   I02=map; ACTUAL_KEY=null;   // 오버레이 강제 재빌드
   if(RES){ ensureActual(RES.I); PDVIEW='all'; const s2=document.getElementById('leasepick'); if(s2&&[...s2.options].some(o=>o.value==='__i02__')) s2.value='__i02__'; setTab('pdiff'); }
-  // 변동 3유형 자동판별 요약 - 재측정 대상(증액·연장)은 사용자 확정이 필요하므로 업로드 직후 알린다
-  const cls=((LEASES&&LEASES.length)?LEASES.map(leaseToI):(RES?[RES.I]:[]))
-    .filter(I=>I.cy&&I.term>0&&I.payment>0&&I02[I.id]).map(I=>({id:I.id,c:i02Classify(I)})).filter(x=>x.c);
-  const re=cls.filter(x=>x.c.remeasure), dec=cls.filter(x=>x.c.type==='감액');
-  const nOf=t=>cls.filter(x=>x.c.type===t).length;
-  alert('i02 업로드 완료 - 납부차이 탭에 실제지급일/금액이 반영되었습니다.'+
-    (cls.length?`\n\n[자동 판별] 선납/지연 ${nOf('선납/지연')} · 초과납 ${nOf('초과납')} · 총액미달 ${nOf('미달')} · 증액 ${nOf('증액')} · 연장 ${nOf('연장')} · 혼합 ${nOf('혼합')} · 감액 ${dec.length}`:'')+
-    (re.length?`\n\n▶ 재측정(문단 44~46) 대상 ${re.length}건: ${re.map(x=>x.id).join(', ')}\n   [납부차이] 탭 상단 판별표에서 [▶ 재측정 탭에서 확정]을 눌러 변경유효일·할인율을 확정하세요(자동 확정하지 않습니다).`:'')+
-    ((()=>{ const ec=cls.filter(x=>x.c.endCand); return ec.length?`\n\n■ 중도해지 후보 ${ec.length}건: ${ec.map(x=>x.id).join(', ')}\n   해지라면 좌측 [중도해지] 칸에 해지일을 입력하세요(무납월과 구분 불가 → 자동 확정하지 않습니다).`:''; })())+
-    (RES&&!I02[RES.I.id]?'\n(현재 선택 리스ID가 i02에 없어 계약상 일정으로 표시됩니다.)':'')+
-    inputWarnText());   // i01에 없는 리스ID(고아) 등 - 조용히 무시하지 않는다
+  // 판별 결과는 바로 열리는 화면에 나오므로 알림창은 입력 경고가 있을 때만 띄운다
+  const iw2=inputWarnText(), miss2=(RES&&!I02[RES.I.id])?'\n(현재 선택 리스ID가 i02에 없어 계약상 일정으로 표시됩니다.)':'';
+  if(iw2||miss2) alert('i02 업로드 완료.'+miss2+iw2);
 }
-// ===== 리스변경(재측정) : 변경 스케줄 업로드 → 원계약 대비 자동 감지 → MOD 프리필 (개선안 §3~6) =====
+// ===== 리스변경(재측정) : 변경 스케줄 업로드 → 원계약 대비 자동 감지 → MOD 자동 채움 (개선안 §3~6) =====
 function uploadMod(e){ const f=e.target.files[0]; e.target.value=''; if(f) readXLFile(f,parseMod); }
 function parseMod(wb){
   if(!RES){ alert('먼저 원계약을 계산하세요([계산 실행]). 변경 스케줄은 현재 계산된 원계약과 대조합니다.'); return; }
@@ -2668,10 +2673,10 @@ function parseMod(wb){
   const r=modFromRows(RES.I,RES,mod,fileMd,fileRsn);
   if(!r.ok){ alert(r.msg); return; }
   setTab('modify');
-  const idWarn=ids.includes(curId)?'':('\n※ 현재 리스('+curId+')가 파일에 없어 파일의 첫 리스('+useId+')로 프리필했습니다.');
+  const idWarn=ids.includes(curId)?'':('\n※ 현재 리스('+curId+')가 파일에 없어 파일의 첫 리스('+useId+')로 채웠습니다.');
   alert('변경 스케줄 감지 완료 - 유형 '+r.tl+', 변경유효일 '+r.mdStr+', 변경후 지급 '+r.nAfter+'회'+(r.uniform?'(정액)':'(비정액)')+'.'+(r.reason==='renego'?'\n▶ 재협상 → 수정 할인율 확인 필요(노랑 배너). 값 확인·수정 후 [수정 할인율 확정].':'\n▶ 지수·요율 → 최초율 유지.')+idWarn);
 }
-// 변경 스케줄 행([{seq,date,amt}]) → 원계약 대비 diff → MOD 프리필 (변경파일 업로드·i02 라우팅 공용 코어)
+// 변경 스케줄 행([{seq,date,amt}]) → 원계약 대비 diff → MOD 자동 채움 (변경파일 업로드·i02 라우팅 공용 코어)
 function modFromRows(I,res,mod,fileMd,fileRsn){
   const rnd=v=>Math.round(v);
   const base=contractualSchedule(I).map(r=>({seq:r.seq, date:r.cdate, amt:r.amt}));
@@ -2688,7 +2693,7 @@ function modFromRows(I,res,mod,fileMd,fileRsn){
   const type = extended&&amtChanged?'혼합':extended?'A':amtChanged?'B':'?';
   // 변경유효일: 파일 명시 우선(월말 스냅), 없으면 첫 변경회차 직전 회차의 월말(§4.2)
   let md;
-  if(fileMd){ const p=parseYMD(fileMd); md=isNaN(+p)?p:parseYMD(snapModDate(fmtD(p))); }   // 월말 간주 규칙 = 수기 입력·개시일과 동일(15일 이하=전월말)
+  if(fileMd){ const p=parseYMD(fileMd); md=isNaN(+p)?p:parseYMD(snapModDate(fmtD(p))); }   // 월말 기준 규칙 = 수기 입력·개시일과 동일(15일 이하=전월말)
   else if(firstDiff<=1){ md=res.deemed; }
   else { const prev=base[firstDiff-2].date; md=monthEnd(prev.getFullYear(),prev.getMonth()); }
   const mk=monthKey(md), after=mod.filter(x=>monthKey(x.date)>mk).sort((a,b)=>a.seq-b.seq);
@@ -2704,7 +2709,7 @@ function modFromRows(I,res,mod,fileMd,fileRsn){
 }
 
 // ===== 전체 요약 (배치 _fm_summary 24열 와꾸 그대로) =====
-const PLLAB=['사용권자산상각비','현할차상각비','이자비용','이자수익'];
+const PLLAB=['사용권자산상각비','현재가치할인차금 상각비','이자비용','이자수익'];
 function cumPL(res,date){ let i=0,c=0,d=0,dep=0; res.rows.forEach(x=>{ if(x.as_of<=date){ i+=x.intr; c+=x.inc; d+=(x.ddiff||0); dep+=x.dep; } }); return {int:i,inc:c,diff:d,depBase:dep-d}; }
 function meMonths(asof,n){ const dd=addMonths(asof,n); return monthEnd(dd.getFullYear(),dd.getMonth()); }
 function plWindow(res,a,b){ const B=cumPL(res,b),A=cumPL(res,a); return {depBase:B.depBase-A.depBase,diff:B.diff-A.diff,int:B.int-A.int,inc:B.inc-A.inc}; }
@@ -2714,7 +2719,7 @@ function summaryData(asof){
   const rows=[], T=new Array(21).fill(0);
   list.filter(I=>I.cy&&I.term>0&&I.payment>0).forEach(I=>{
     const res=(I.startmode==='daily'?computeDaily(I):compute(I)), m=asofMetrics(res,asof);   // 개시일 처리방식(간주/일할) 반영
-    const fyStart=fyPrevEnd(asof);   // 직전 회계연도말(당기 개시 직전) - 당기누적(YTD) 기준. 회계연도 개시월은 [회계연도 개시월] 설정.
+    const fyStart=fyPrevEnd(asof);   // 직전 회계연도말(당기 개시 직전) - 당기누적 기준. 회계연도 개시월은 [회계연도 개시월] 설정.
     const d1=plWindow(res,meMonths(asof,-1),asof), d3=plWindow(res,meMonths(asof,-3),asof), dYTD=plWindow(res,fyStart,asof);
     const nums=[res.rou,res.liability,res.depDiff, m.rou,m.accum,m.cur,m.noncur,m.liab,m.depbal,
       d1.depBase,d1.diff,d1.int,d1.inc, d3.depBase,d3.diff,d3.int,d3.inc, dYTD.depBase,dYTD.diff,dYTD.int,dYTD.inc].map(R);
@@ -2728,7 +2733,7 @@ function renderSummaryView(){
   if(!(base.cy&&base.term>0&&base.payment>0)){ ['asofpanel','stats','tabs'].forEach(id=>document.getElementById(id).innerHTML=''); document.getElementById('panel').innerHTML='<div class="note">유효한 계약이 없습니다.</div>'; return; }
   VIEW='summary';
   const asof=getAsof(base), S=summaryData(asof); RES=(base.startmode==='daily'?computeDaily(base):compute(base)); JE=journal(RES);
-  const t=S.totals, basisTxt=(base.startmode==='daily'?'실제일 일할(ACT/365)':'월말 간주(월할)');
+  const t=S.totals, basisTxt=(base.startmode==='daily'?'실제일 일할(연 365일)':'월말 기준(월할)');
   const F=finalRollup(asof), hasI02=!!(I02&&Object.keys(I02).length);
   const flist=(LEASES&&LEASES.length)?LEASES.map(leaseToI).filter(I=>I.cy&&I.term>0&&I.payment>0):[base];
   // 당월·당분기 이자 = 계약상 + 재측정분(i02는 이자를 바꾸지 않는다)
@@ -2744,9 +2749,9 @@ function renderSummaryView(){
     `<th class="grp" colspan="6" style="background:#1f4e78">결산일 현재 BS</th>`+
     `<th class="grp" colspan="4" style="background:#2e6bab">PL·당월</th>`+
     `<th class="grp" colspan="4" style="background:#3f78ad">PL·당분기(3개월)</th>`+
-    `<th class="grp" colspan="4" style="background:#5590c2">PL·당기누적(YTD)</th></tr>`;
-  const short=['상각비','현할차상각','이자비용','이자수익'];
-  const cols=['리스ID','리스개시일','간주개시일','사용권자산(최초원가)','리스부채(최초)','보증금현할차','사용권자산(장부금액)','상각누계액','리스부채(유동)','리스부채(비유동)','리스부채 합계','보증금(금융자산)'].concat(short,short,short);
+    `<th class="grp" colspan="4" style="background:#5590c2">PL·당기누적</th></tr>`;
+  const short=['상각비','할인차금상각','이자비용','이자수익'];
+  const cols=['리스ID','리스개시일','계산 개시일','사용권자산(최초원가)','리스부채(최초)','보증금 현재가치할인차금','사용권자산(장부금액)','상각누계액','리스부채(유동)','리스부채(비유동)','리스부채 합계','보증금(금융자산)'].concat(short,short,short);
   const frz=['l frz frz0','l frz frz1','l frz frz2'];
   const hd=`<tr>`+cols.map((c,i)=>`<th class="${i<3?frz[i]:''}">${c}</th>`).join('')+`</tr>`;
   let body='';
@@ -2755,18 +2760,18 @@ function renderSummaryView(){
   const fin=summaryFinalPanel(asof,F), hasFin=fin.indexOf('최종 공시 금액 (전체')>=0, prov=F.need>0||F.overlap.length>0||F.stale.length>0;
   document.getElementById('panel').innerHTML=inputWarnBox()+fin+
     `<div class="note" style="margin:14px 0 6px;font-size:13px"><b>■ 계약별 명세</b> - `+
-    (prov?`<b>계약상(i01) 기준</b> 금액입니다. 위 검토 건을 처리하기 전까지 재무제표 금액으로 쓰지 마세요.`
-      :hasFin?`<b>계약상(i01) 기준</b>, 조정 전 금액입니다. 재무제표에는 위 [최종 공시 금액] 표의 금액을 쓰세요.`
+    (prov?`<b>계약상 기준</b> 금액입니다. 위 검토 건을 처리하기 전까지 재무제표 금액으로 쓰지 마세요.`
+      :hasFin?`<b>계약상 기준</b>, 조정 전 금액입니다. 재무제표에는 위 [최종 공시 금액] 표의 금액을 쓰세요.`
       :(hasI02?`조정이 없어 이 표가 곧 최종 금액입니다.`:`실제 납부(i02)를 올리지 않아 계약상 금액입니다.`))+`</div>`+
     `<div class="tblbox" style="max-height:540px;overflow:auto"><table class="sumtbl" style="min-width:1700px">${g}${hd}${body}</table></div>`+
     `<div class="note">계약별 상세는 위 드롭다운에서 개별 선택. 결과 엑셀은 좌측 '결과 엑셀 내려받기(틀고정)'.</div>`+
     summaryTermPanel(asof)+summaryModCompare(asof)+summaryI02Compare(asof);
   document.getElementById('note').innerHTML=''; sessionSave();
 }
-// ===== 최종(공시) 금액 = 계약상(i01 본문) + i02 조정 + 재측정 조정 =====
+// ===== 최종(공시) 금액 = 계약상 + 실제 납부 조정 + 재측정 조정 =====
 // 본문(요약 24열·결과엑셀)은 계약상 기준이고 두 조정은 각각 별도 비교표뿐이라, 최종 금액이 어디에도 없었다(코드리뷰 A4).
-// 두 레이어는 겹치지 않는다 - 재측정 확정 시 i02Overlay(L1094)가 변경유효일 이후 i02 금액을 제외하므로 단순 합산이 성립.
-// BS=결산일 시점값 / PL=당기(YTD) - 조정의 당기분 = 결산일 누적조정 − 직전 회계연도말 누적조정(분개장 전기·당기 차분과 동일 기준).
+// 두 레이어는 겹치지 않는다 - 재측정 확정 시 i02Overlay(L1094)가 변경유효일 이후 실제 납부 금액을 제외하므로 단순 합산이 성립.
+// BS=결산일 시점값 / PL=당기 - 조정의 당기분 = 결산일 누적조정 − 직전 회계연도말 누적조정(분개장 전기·당기 차분과 동일 기준).
 // 미확정 재측정 - 판별상 재측정(문단 44~46) 대상인데 MODS에 확정 저장이 없는 계약.
 // finalRollup은 확정분(MODS)만 재측정 레이어로 합산하므로, 미확정이 있으면 [최종] 열이 최종이 아니다
 // (연장=부채 누락 / 감액=부호 반대). 계산은 그대로 두고 경고만 띄운다 - 자동 확정 금지.
@@ -2782,10 +2787,10 @@ function pendingRemeasureBox(F){
   const ids=p.slice(0,12).join(', ')+(p.length>12?` 외 ${p.length-12}건`:'');
   return `<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;margin:0 0 6px;font-size:13px">`+
     `<b>⚠ 재측정 대상 ${p.length}건이 미확정입니다. ${(F.nI02||F.nMod)?'아래 [최종 공시 금액] 표는':'아래 금액은'} 아직 최종이 아닙니다.</b> `+
-    `확정 전까지 재측정 레이어가 비어 있어 <b>부채가 누락(연장)되거나 부호가 반대(감액)</b>로 남습니다. `+
+    `확정 전까지 재측정 조정이 비어 있어 <b>부채가 누락(연장)되거나 부호가 반대(감액)</b>로 남습니다. `+
     `<b>[납부차이] 탭</b> 상단 판별표에서 [▶ 재측정 탭에서 확정]을 눌러 확정하세요: <b>${ids}</b></div>`;
 }
-// 계약 1건의 3층: 계약상(C) + i02 조정(P) + 재측정 조정(M). 전체 합계(finalRollup)와 단건 상단 카드가 같은 계산을 쓴다.
+// 계약 1건의 3층: 계약상(C) + 실제 납부 조정(P) + 재측정 조정(M). 전체 합계(finalRollup)와 단건 상단 카드가 같은 계산을 쓴다.
 // actual = 실제 지급 목록(null이면 i02 층 없음). cum = 개시 이후 누적 손익(최종 기준).
 const FINAL_KEYS=['liab','cur','noncur','rou','accum','depbal','intr','dep','conc','tgain','rgain','inc'];
 function finalZero(){ return FINAL_KEYS.reduce((o,k)=>(o[k]=0,o),{}); }
@@ -2794,11 +2799,11 @@ function leaseFinalParts(I,asof,fy,actual){
   const res=(I.startmode==='daily'?computeDaily(I):compute(I)), m=asofMetrics(res,asof), y=plWindow(res,fy,asof);
   const inCY=d=>d && d.getTime()>fy.getTime() && d.getTime()<=asof.getTime();   // 당기 중 발생한 해지·축소만 PL에 싣는다
   const C=Object.assign(Z(),{liab:m.liab,cur:m.cur,noncur:m.noncur,rou:m.rou,accum:m.accum,depbal:m.depbal,
-    intr:y.int, inc:y.inc, dep:y.depBase+y.diff,   // 감가상각비 = 기본 상각 + 보증금 현할차상각(분개장 1411·재측정 레이어 plDep와 같은 기준, 독립검토 D-1)
+    intr:y.int, inc:y.inc, dep:y.depBase+y.diff,   // 감가상각비 = 기본 상각 + 보증금 현재가치할인차금상각(분개장 1411·재측정 레이어 plDep와 같은 기준, 독립검토 D-1)
     tgain:(res.term&&inCY(res.term.asof))?res.term.net:0,
     // 축소손익 = 46(a) 비례감소 이익 - 45 재측정 조정이 사용권자산을 초과해 당기손익으로 간 부분(plExcess)
     rgain:(res.reduction&&inCY(res.reduction.asof))?(res.reduction.gain-((res.reduction.remeasure&&res.reduction.remeasure.plExcess)||0)):0});
-  // i02 조정: 계약 단위로는 [i02 반영 전후] 표와 동일하게 산출한다(두 표의 '반영 후'가 정확히 일치해야 한다).
+  // 실제 납부 조정: 계약 단위로는 [실제 납부 반영 전후] 표와 동일하게 산출한다(두 표의 '반영 후'가 정확히 일치해야 한다).
   let P=Z(), od=0; const cum={intr:m.plInt,dep:m.plDep};
   if(actual){
     const aN=pdAdjustment(I,actual,asof), aP=pdAdjustment(I,actual,fy);
@@ -2850,7 +2855,7 @@ function finalTableHTML(T,asof,fy){
   const body=grp(`재무상태표 · 결산일 ${fmtD(asof)} 현재`)+bs.map(rowHTML).join('')+
     grp(`손익 · 당기(${fmtD(fy)} 다음날 ~ ${fmtD(asof)})`)+pl.filter(r=>Math.abs(T.F[r.k])>=1||r.k==='intr'||r.k==='dep').map(rowHTML).join('');
   return `<div class="tblbox" style="max-height:none;max-width:760px"><table>`+
-    thead(['항목','계약상(i01)','+ i02 조정','+ 재측정 조정','최종'])+body+`</table></div>`;
+    thead(['항목','계약상','+ 실제 납부 조정','+ 재측정 조정','최종'])+body+`</table></div>`;
 }
 // 미지급 유동 분류 각주(요약 패널·단건 상단 내역 공용)
 function finalOdNote(v){ return v>=1?`<div class="note" style="margin:6px 0 0;color:#7a5b00">※ <b>미지급(지연·미납) ${won(v)}을 유동으로 분류</b>했습니다. 계약상 도래일이 지났거나 12개월 안에 도래하는 미납분은 지급을 연기할 권리가 없어 유동입니다(K-IFRS 1001 유동·비유동 분류). 리스부채 <b>합계는 변하지 않고</b> 유동·비유동 구분만 달라집니다.</div>`:''; }
@@ -2869,18 +2874,18 @@ function summaryFinalPanel(asof,F0){
     `<td style="font-weight:600">${won(r.C.rou+r.P.rou+r.M.rou)}</td>`+
     `<td>${won(r.C.intr+r.P.intr+r.M.intr)}</td><td>${won(r.C.dep+r.P.dep+r.M.dep)}</td></tr>`).join('');
   return pendBox+`<div class="note" style="background:#eef2f7;border-left:4px solid var(--navy);margin:0 0 6px;font-size:13px">`+
-    `<b>${prov?'⚠':'✅'} 최종 공시 금액 (전체 ${F.n}건 · 결산일 ${fmtD(asof)})</b> - <b>계약상(i01 본문) + i02 조정 + 재측정 조정</b>. `+
+    `<b>${prov?'⚠':'✅'} 최종 공시 금액 (전체 ${F.n}건 · 결산일 ${fmtD(asof)})</b> - <b>계약상 + 실제 납부 조정 + 재측정 조정</b>. `+
     (prov?`<b>검토 건을 처리하기 전까지 [최종] 열은 잠정 금액입니다.</b> `:`<b>이 표의 [최종] 열을 재무제표에 옮겨 적으세요.</b> `)+`아래 요약 표 본체와 결과엑셀 '요약' 시트는 <b>계약상 기준</b>입니다`+
-    (F.nI02?` · i02 조정 ${F.nI02}건`:'')+(F.nMod?` · 재측정 조정 ${F.nMod}건`:'')+`</div>`+
+    (F.nI02?` · 실제 납부 조정 ${F.nI02}건`:'')+(F.nMod?` · 재측정 조정 ${F.nMod}건`:'')+`</div>`+
     finalTableHTML(T,asof,F.fy)+
     (det?`<div class="note" style="margin:8px 0 4px;font-size:12px;color:#666">조정이 있는 계약 ${F.rows.length}건 (리스부채 기준 분해)</div>`+
       `<div class="tblbox" style="max-height:300px"><table>`+
-      thead(['리스ID','계약상 부채','+i02','+재측정','최종 부채','최종 사용권자산','당기 이자비용','당기 감가상각비'])+det+`</table></div>`:'')+
-    `<div class="note" style="color:#888;margin:4px 0 16px;font-size:11px">해지·범위축소는 스케줄 자체가 잘리므로 <b>계약상 열에 이미 반영</b>돼 있습니다(조정 레이어 아님). `+
-    `손익은 당기(YTD) 기준이라 조정분도 <b>결산일 누적 − 전기말 누적</b>으로 산출했습니다 - 전기까지의 조정은 전기 재무제표에 이미 반영됐다고 봅니다(미반영이면 [결산 분개장]의 전기 수정분개 확인). `+
-    `유동/비유동은 <b>본문이 월말 스케줄·조정분이 실제일(ACT/365)</b> 기준이라 구분 경계에서 근사가 섞입니다(부채 <b>합계</b>는 영향 없음).</div>`+odNote;
+      thead(['리스ID','계약상 부채','+실제 납부','+재측정','최종 부채','최종 사용권자산','당기 이자비용','당기 감가상각비'])+det+`</table></div>`:'')+
+    `<details class="note" style="margin:4px 0 16px"><summary style="cursor:pointer;font-weight:600">이 표 읽는 법</summary>해지·범위축소는 스케줄 자체가 잘리므로 <b>계약상 열에 이미 반영</b>돼 있습니다(별도 조정 아님). `+
+    `손익은 당기 기준이라 조정분도 <b>결산일 누적 − 전기말 누적</b>으로 산출했습니다 - 전기까지의 조정은 전기 재무제표에 이미 반영됐다고 봅니다(미반영이면 [결산 분개장]의 전기 수정분개 확인). `+
+    `유동/비유동은 <b>본문이 월말 스케줄·조정분이 실제일(연 365일)</b> 기준이라 구분 경계에서 근사가 섞입니다(부채 <b>합계</b>는 영향 없음).</details>`+odNote;
 }
-// 전체(포트폴리오) i02 반영 전후 비교 - 요약 표는 계약상, 이 표가 i02 반영 후 리스부채·이자
+// 전체(포트폴리오) 실제 납부 반영 전후 비교 - 요약 표는 계약상, 이 표가 실제 납부 반영 후 리스부채·이자
 function summaryI02Compare(asof){
   if(!I02 || !Object.keys(I02).length) return '';   // 업로드된 i02 없으면 미표시
   const list=(LEASES&&LEASES.length)? LEASES.map(L=>leaseToI(L)) : (RES?[RES.I]:[]);
@@ -2901,14 +2906,13 @@ function summaryI02Compare(asof){
   const body=rows.map(r=>{ const d=R(r[2]-r[1]), chg=Math.abs(d)>=1;
     return `<tr><td class="l">${r[0]}</td><td>${won(r[1])}</td><td>${won(r[2])}</td>`+
       `<td class="l" style="${chg?'color:#c00000;font-weight:600':'color:#999'}">${chg?(d>=0?'▲ +':'▼ −')+won(Math.abs(d)):'0'}</td></tr>`; }).join('');
-  return `<div class="note" style="margin:18px 0 6px;font-size:13px"><b>📊 i02 반영 전후 비교 (전체 ${valid.length}건 · i02 차이 발생 ${nAff}건)</b> · 결산일 ${fmtD(asof)}</div>`+
-    `<div class="tblbox" style="max-height:none;max-width:640px"><table>`+thead(['항목','i02 반영 전','i02 반영 후','증감'])+body+`</table></div>`+
-    `<div class="note" style="color:#888;margin-top:4px">위 요약 표 본체·결과엑셀은 <b>계약상(i01) 기준</b>이며, 이 표가 <b>i02 반영 후</b> 금액입니다(선납→↓/지연→↑). 총액이 같은 선납/지연이면 사용권자산·감가상각비는 변동 없고, <b>누적 지급이 계약 총액을 넘는 초과분만</b> 사용권자산에 가산됩니다. 자산별 상세는 위 드롭다운에서 개별 선택 → [납부차이] 탭.</div>`+
+  return `<div class="note" style="margin:18px 0 6px;font-size:13px"><b>📊 실제 납부 반영 전후 비교 (전체 ${valid.length}건 · 차이 발생 ${nAff}건)</b> · 결산일 ${fmtD(asof)}</div>`+
+    `<div class="tblbox" style="max-height:none;max-width:640px"><table>`+thead(['항목','반영 전','반영 후','증감'])+body+`</table></div>`+
     (Math.abs(tEx)>=1?`<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;max-width:640px"><b>총액 초과납 합계 ${won(tEx)}</b> - 비환급 추가 대가로 보아 사용권자산 가산·잔여기간 상각(문단 44~46 취지). 계약별 근거·커멘트는 [납부차이] 탭.</div>`:'')+
     (nTiming?`<div class="note" style="background:#eef7f0;border:1px solid #b7dcc2;color:#177245;max-width:640px"><b>지급 시기 차이 ${nTiming}건 - 계약 할인율 유지</b>. 이자비용은 계약 스케줄 그대로이고 리스부채만 계약 지급 누계와의 차이만큼 조정합니다(할인 없음, 모두 지급하면 0). 전제는 [납부차이] 탭과 결과 엑셀 [전제·가정] 시트에 있습니다.</div>`:'')+
     (short.length?`<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;max-width:640px"><b>⚠ 총액 미달 ${short.length}건</b><br>${short.join(' · ')}<br>미납이면 미납액만큼 부채가 남는 것이 정상이고(문단 37 이자 없음, 지연손해금은 계산하지 않음), 비정액 계약(회차별 단가 상이)이면 <b>i01 정기 리스료 정정</b>이 필요합니다. 어느 쪽인지 확인하세요.</div>`:'');
 }
-// 포트폴리오 재측정 반영 전후 (요약 뷰) - 본문은 계약상(i01) 기준, 이 표가 재측정 반영 후
+// 포트폴리오 재측정 반영 전후 (요약 뷰) - 본문은 계약상 기준, 이 표가 재측정 반영 후
 function summaryModCompare(asof){
   if(!MODS||!Object.keys(MODS).length) return '';
   const list=(LEASES&&LEASES.length)? LEASES.map(leaseToI) : (RES?[RES.I]:[]);
@@ -2929,7 +2933,7 @@ function summaryModCompare(asof){
       `<td class="l" style="${chg?'color:#c00000;font-weight:600':'color:#999'}">${chg?(d>=0?'▲ +':'▼ −')+won(Math.abs(d)):'0'}</td></tr>`; }).join('');
   const det=rows.map(r=>`<tr><td class="l">${r.id}</td><td class="l">${fmtD(r.adj.md)}</td><td>${won(r.adj.adjust)}</td>`+
     `<td>${won(r.adj.liab)}</td><td>${won(r.adj.rou)}</td><td>${won(r.adj.intr)}</td><td>${won(r.adj.dep)}</td></tr>`).join('');
-  return `<div class="note" style="margin:18px 0 6px;font-size:13px"><b>📐 리스변경(재측정) 반영 전후 (${rows.length}건)</b> · 결산일 ${fmtD(asof)} - 요약 표 본체·결과엑셀은 <b>계약상(i01) 기준</b>이며, 이 표가 <b>재측정 반영 후</b>입니다(계약별 수정분개는 [결산 분개장] 탭).</div>`+
+  return `<div class="note" style="margin:18px 0 6px;font-size:13px"><b>📐 리스변경(재측정) 반영 전후 (${rows.length}건)</b> · 결산일 ${fmtD(asof)} - 요약 표 본체·결과엑셀은 <b>계약상 기준</b>이며, 이 표가 <b>재측정 반영 후</b>입니다(계약별 수정분개는 [결산 분개장] 탭).</div>`+
     `<div class="tblbox" style="max-height:none;max-width:680px"><table>`+thead(['항목','재측정 반영 전','반영 후','증감'])+body+`</table></div>`+
     `<div class="tblbox" style="max-height:none;margin-top:8px"><table>`+thead(['리스ID','변경유효일','부채 조정(변경일)','리스부채 증감','사용권자산 증감','이자비용 증감','감가상각비 증감'])+det+`</table></div>`;
 }
@@ -2961,12 +2965,12 @@ function summaryTermPanel(asof){
 // ===== ⑤ 리스변경·재측정 (K-IFRS 제1116호 문단 44~46) =====
 // 변경유효일에 수정 할인율로 잔여 리스료를 재측정 → 리스부채 조정액을 사용권자산에 가감.
 // 사용권자산이 0 미만이 되는 초과 감소분은 당기손익(리스변경이익).
-let SCHEDVIEW='after';   // 상각표 보기: after=승격 후(적용중) / before=승격 전(정기리스료) / diff=차이
+let SCHEDVIEW='after';   // 상각표 보기: after=전환 후(적용중) / before=전환 전(정기리스료) / diff=차이
 function setSchedView(v){ SCHEDVIEW=v; render(); }
-// 반영 '전' 결과 - 비정액 승격·중도해지·범위축소를 모두 해제한 원계약(i01 기본) 스케줄
+// 반영 '전' 결과 - 비정액 전환·중도해지·범위축소를 모두 해제한 원계약(i01 기본) 스케줄
 function schedBefore(I){ const J=Object.assign({},I,{pmts:null, endDate:'', redDate:'', redPct:0});
   return (J.startmode==='daily'?computeDaily(J):compute(J)); }
-// 반영 '후' 결과 - 현재 계산(승격·해지·축소 반영) + 재측정 확정 시 접합 스케줄
+// 반영 '후' 결과 - 현재 계산(전환·해지·축소 반영) + 재측정 확정 시 접합 스케줄
 function schedAfter(I,res){
   const mod=MODS[I.id];
   if(!mod) return res;
@@ -2979,13 +2983,13 @@ function schedAfter(I,res){
 // 상각표 전/후 비교 대상인가 - 상각표(본문 스케줄)가 실제로 달라지는 유형만
 function hasSchedDiff(I){ return !!(PMTS[I.id] || I.endDate || (I.redDate&&I.redPct>0) || MODS[I.id]); }
 function schedKinds(I){ const k=[];
-  if(PMTS[I.id]) k.push('비정액 승격');
+  if(PMTS[I.id]) k.push('비정액 전환');
   if(MODS[I.id]) k.push('리스변경(재측정)');
   if(I.endDate) k.push('중도해지');
   if(I.redDate&&I.redPct>0) k.push('범위축소');
   return k; }
 // 분개장 전/후 비교 대상 - 본문 스케줄(=분개 원천)이 실제로 달라지는 유형만.
-// 재측정(MODS)은 본문을 건드리지 않는 조정 레이어라 '수정분개' 박스로 따로 표시된다(§22).
+// 재측정(MODS)은 본문을 건드리지 않는 별도 조정라 '수정분개' 박스로 따로 표시된다(§22).
 function hasJEDiff(I){ return !!(PMTS[I.id] || I.endDate || (I.redDate&&I.redPct>0)); }
 // 반영 전후 분개 차이 - (일자·계정)별로 차변−대변을 상계해 실제로 달라진 줄만 남긴다.
 function journalDiff(A,B){
@@ -3007,7 +3011,7 @@ function schedToggle(I){
   const kinds=schedKinds(I);
   return `<div class="note" style="margin:0 0 8px;background:#eef7f0;border:1px solid #b7dcc2;color:#177245">`+
     `<div style="margin-bottom:6px"><b>■ ${kinds.join(' + ')} 반영됨</b> - 상각표를 반영 전/후로 비교할 수 있습니다`+
-    (PMTS[I.id]?' (비정액 승격은 <b>개시일부터 소급</b>)':'')+`.</div>`+
+    (PMTS[I.id]?' (비정액 전환은 <b>개시일부터 소급</b>)':'')+`.</div>`+
     b('after','반영 후 (적용중)')+b('before','반영 전 (원계약)')+b('diff','차이')+
     `<div style="margin-top:7px;font-size:12px;color:#555">리스부채(최초) ${won(B.liability)} → <b>${won(A.liability)}</b> (${d(A.liability,B.liability)}) · `+
     `사용권자산(원가) ${won(B.rou)} → <b>${won(A.rou)}</b> (${d(A.rou,B.rou)}) · `+
@@ -3028,7 +3032,7 @@ function schedPairRows(I){
   const keys=[...new Set([...B.keys(),...A.keys()])].sort((x,y)=>x-y);
   return keys.map(k=>({as_of:(A.get(k)||B.get(k)).as_of, a:A.get(k)||_z, b:B.get(k)||_z}));
 }
-// 승격(비정액 계약) 수정분개 - 승격 후 지표 − 승격 전 지표(결산일 누적). i02 조정분개와 같은 plug 구조.
+// 전환(비정액 계약) 수정분개 - 전환 후 지표 − 전환 전 지표(결산일 누적). 실제 납부 조정분개와 같은 plug 구조.
 function promoteAdj(I,asof){
   const A=RES, B=schedBefore(I), mA=asofMetrics(A,asof), mB=asofMetrics(B,asof);
   const cash=r=>{ const adv=(I.timing==='선급')?pmtVec(r.I)[0]:0;
@@ -3052,11 +3056,11 @@ function promoteJEBox(I){
     `<div class="tblbox" style="max-height:none"><table>`+thead(['차변계정','차변','대변계정','대변'])+
     (jeToRows(je)||`<tr><td class="l" colspan="4">조정 없음</td></tr>`)+`</table></div>`+(note||'');
   return `<div class="note" style="margin:0 0 6px;background:#eef7f0;border:1px solid #b7dcc2;color:#177245">`+
-    `<b>■ 비정액 계약 승격 - 수정분개</b> 계약상 정기리스료 기준 장부에 아래 분개를 더하면 <b>승격 후(실제 계약 조건) 장부</b>가 됩니다. `+
-    `승격은 <b>개시일부터 소급</b>이므로 변경분이 전기/당기로 나뉩니다.</div>`+
+    `<b>■ 비정액 계약 전환 - 수정분개</b> 계약상 정기리스료 기준 장부에 아래 분개를 더하면 <b>전환 후(실제 계약 조건) 장부</b>가 됩니다. `+
+    `전환은 <b>개시일부터 소급</b>이므로 변경분이 전기/당기로 나뉩니다.</div>`+
     box(`<b>당기 수정분개</b> (결산일 ${fmtD(asof)} · 직전결산일 ${fmtD(prev)} 이후분)`,jeCur)+
     (jePv.length?box(`<b>전기 수정분개</b> <span style="color:#888">(전기완료·참고 - 직전결산일까지 누적. 전기 재무제표와 차이가 있다면 오류수정·재작성 여부를 판단하세요)</span>`,jePv):'')+
-    `<div class="note" style="color:#888;margin-top:4px">리스부채는 plug(대차 일치). 승격 후 최초 리스부채·사용권자산 원가가 함께 바뀌므로 원가·상각누계·이자·감가·지급액이 모두 조정 대상입니다.</div>`;
+    `<div class="note" style="color:#888;margin-top:4px">리스부채는 대차를 맞추는 금액입니다. 전환 후 최초 리스부채·사용권자산 원가가 함께 바뀌므로 원가·상각누계·이자·감가·지급액이 모두 조정 대상입니다.</div>`;
 }
 let TOPSTATS=null;   // 개별 계약 상단 stat 캐시(총괄 뷰에서 되돌릴 때 사용)
 let MOD=null, MOD_KEY=null, MODS={};   // MODS: 리스별 저장된 재측정(차기 이월용) - 리스ID → MOD 스냅샷
@@ -3072,9 +3076,9 @@ function modSaveForCarry(){
   alert('재측정 확정 - 「'+(I.id||'')+'」'+NL+NL+
     '· 변경유효일 '+MOD.mdate+' · 부채 조정 '+won(M.adjust)+' · 이월 사용권자산 '+won(M.newRou)+NL+
     (adj?'· 당기 결산 반영(수정분개): 리스부채 '+won(adj.liab)+' · 사용권자산 '+won(adj.rou)+' · 이자비용 '+won(adj.intr)+' · 감가상각비 '+won(adj.dep)+NL:'')+
-    NL+'[결산 분개장] 탭에 수정분개가, 요약에 전후 비교가 표시됩니다. 차기 i01은 좌측 [차기 결산 i01 생성(이월)]으로 만드세요.');
+    NL+'[결산 분개장] 탭에 수정분개가, 요약에 전후 비교가 표시됩니다. 차기 i01은 상단 [차기 결산 i01 생성]으로 만드세요.');
 }
-// ===== M-1 재측정 본문 반영(조정 레이어) - i02와 같은 방식: 계약상 장부(i01) + 수정분개 = 재측정 반영 후 =====
+// ===== M-1 재측정 본문 반영(별도 조정) - i02와 같은 방식: 계약상 장부(i01) + 수정분개 = 재측정 반영 후 =====
 // 본문 스케줄(res.rows)은 건드리지 않고, 변경일 전(원계약)+후(재측정) 접합 스케줄로 결산일 지표만 계산해 차이를 낸다.
 function modMergedRows(res,M){
   let pre=res.rows.filter(x=>x.as_of.getTime()<=M.md.getTime());
@@ -3090,8 +3094,8 @@ function modMergedRows(res,M){
   // 보증금(금융자산)은 리스부채 재측정과 무관하다 - 변경 후 행에 원계약의 같은 달 보증금 값을 이월한다.
   // 이 이월이 없으면 변경일 이후 보증금 이자수익·장부금액이 스케줄에서 통째로 사라진다.
   const dm=new Map(); res.rows.forEach(x=>{ if(x.dopen||x.inc||x.dcls) dm.set(x.as_of.getTime(),x); });
-  // 변경일 이후 보증금 변동의 현할차 - 원계약 스케줄에는 ROU 가산이 반영돼 있지만 M.rows(재측정 전진 스케줄)는 모른다.
-  // 그대로 두면 당기 병합 ROU가 현할차만큼 과소하고 차기 재기준+시트 재반영 시점에 점프한다(코워크 E4, 2026-07-28. +510,732).
+  // 변경일 이후 보증금 변동의 현재가치할인차금 - 원계약 스케줄에는 ROU 가산이 반영돼 있지만 M.rows(재측정 전진 스케줄)는 모른다.
+  // 그대로 두면 당기 병합 ROU가 현재가치할인차금만큼 과소하고 차기 이월+시트 재반영 시점에 점프한다(코워크 E4, 2026-07-28. +510,732).
   // compute()와 같은 정책(그 달 기말 가산 → 잔여 정액, 잔여 없으면 그 달 즉시 인식, 음수는 0 캡)으로 post ROU 트랙을 재구축한다.
   const mvPost=new Map();
   (res.depMoveList||[]).forEach(mv=>{ const dt=parseYMD(mv.date); if(dt.getTime()>M.md.getTime()) mvPost.set(dt.getTime(), R((mvPost.get(dt.getTime())||0)+mv.diff)); });
@@ -3172,10 +3176,10 @@ function modJEBox(I){
   return `<div class="note" style="margin:0 0 6px;background:#fdf0f0;border:1px solid #e0b0b0;color:#8a2020">`+
     `<b>■ 리스변경(재측정) - 수정분개</b> 변경유효일 <b>${fmtD(now.md)}</b> · 부채 조정 <b>${won(now.adjust)}</b>`+
     (now.plExcess?` · 사용권자산 초과감소 ${won(now.plExcess)}는 당기손익`:'')+`<br>`+
-    `계약상(i01) 장부에 아래 분개를 더하면 <b>재측정 반영 후</b> 장부가 됩니다(문단 44~46). 요약·상각표·결과엑셀 본문은 계약상 기준이며, 이 분개가 그 차이입니다.</div>`+
+    `계약상 장부에 아래 분개를 더하면 <b>재측정 반영 후</b> 장부가 됩니다(문단 44~46). 요약·상각표·결과엑셀 본문은 계약상 기준이며, 이 분개가 그 차이입니다.</div>`+
     box(`<b>당기 수정분개</b> (결산일 ${fmtD(asof)} · 직전결산일 ${fmtD(prev)} 이후분)`,jeCur)+
     (jePv.length?box(`<b>전기 수정분개</b> <span style="color:#888">(전기완료·참고 - 직전결산일까지 누적)</span>`,jePv):'')+
-    `<div class="note" style="color:#888;margin-top:4px">리스부채는 plug(대차 일치). 변경일 이후 이자·감가·리스료가 모두 달라지므로 누적 차이를 한 덩어리로 조정합니다. 차기 결산은 <b>[차기 결산 i01 생성]</b>의 재기준 행으로 갈아끼우면 본문에 직접 반영됩니다.</div>`;
+    `<div class="note" style="color:#888;margin-top:4px">리스부채는 대차를 맞추는 금액입니다. 변경일 이후 이자·감가·리스료가 모두 달라지므로 누적 차이를 한 덩어리로 조정합니다. 차기 결산은 <b>[차기 결산 i01 생성]</b>의 이월 행으로 갈아끼우면 본문에 직접 반영됩니다.</div>`;
 }
 // 저장값 기준 이월 사용권자산 - 저장 뒤 개시일 처리방식·안분을 바꾸면 스냅숏(_newRou)과 달라지므로 다시 계산한다
 function modSavedRou(I){ const mod=MODS[I.id]; if(!mod) return 0; const sM=MOD, sK=MOD_KEY; MOD=mod; MOD_KEY=modKey(I); let r=mod._newRou||0; try{ r=modResult(I,RES).newRou; }catch(e){} MOD=sM; MOD_KEY=sK; return r; }
@@ -3191,7 +3195,7 @@ function modEnsure(I,res){
   MOD={ mdate:fmtD(md), newPmt:I.payment, newPmts:null, remMonths:Math.max(1,(I.term||0)-k0), newRate:R(I.rate*10000)/100, reason:'renego', rateConfirmed:false, detected:null };
   MOD_KEY=key;
 }
-// 변경유효일 월말 간주 - 본문 스케줄이 월말 행이라 월중 날짜를 그대로 쓰면 변경월 한 달이 통째로 빠진다
+// 변경유효일 월말 기준 - 본문 스케줄이 월말 행이라 월중 날짜를 그대로 쓰면 변경월 한 달이 통째로 빠진다
 // (past=as_of<=md는 전월말까지, 변경후 첫 행은 md+1개월말 → 변경월 이자·감가·현금 소멸).
 // 규칙은 개시일과 동일(15일 이하=전월말 → 그 달부터 변경후 조건 / 16일 이상=당월말 → 다음 달부터).
 function snapModDate(ds){
@@ -3199,14 +3203,14 @@ function snapModDate(ds){
   if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return ds;
   const d=parseYMD(s); if(isNaN(+d)) return ds;
   // [월중 이벤트 일할 안분] ON이면 15일 규칙을 쓰지 않고 항상 '당월말'로 정규화한다.
-  // 15일 규칙은 3/15→2/28, 3/16→3/31로 방향이 갈려 하루 차이로 금액이 크게 튀었다(M-3).
+  // 15일 규칙은 3/15→2/28, 3/16→3/31로 방향이 갈려 하루 차이로 금액이 크게 튀었다.
   // 정규화 후 변경월 손익은 modResult에서 경과일수로 안분하므로 연속적으로 변한다.
   const b=(prorateOn() || d.getDate()>15)? d : addMonths(d,-1);
   return fmtD(monthEnd(b.getFullYear(), b.getMonth()));
 }
 function modEdit(field,val){
   if(field==='mdate'){ const raw=String(val||'').trim(), sn=snapModDate(raw);
-    // 변경유효일을 옮기면 잔여기간도 그만큼 따라와야 한다 - 프리필 값이 그대로 남으면
+    // 변경유효일을 옮기면 잔여기간도 그만큼 따라와야 한다 - 자동 채움 값이 그대로 남으면
     // 변경 후 스케줄이 계약 종료월을 넘거나 모자란다(리뷰 지적).
     const oMd=MOD.mdate?parseYMD(MOD.mdate):null, nMd=parseYMD(sn);
     if(oMd && !isNaN(+oMd) && !isNaN(+nMd) && MOD.remMonths>0){
@@ -3226,7 +3230,7 @@ function modEdit(field,val){
 }
 function modConfirmRate(){ if(MOD){ MOD.rateConfirmed=true; MOD.touched=true; render(); } }
 function modResult(I,res){
-  const sn=snapModDate(MOD.mdate); if(sn!==MOD.mdate){ MOD.mdate=sn; }   // 저장된 세션·프리필 등 다른 경로로 들어온 월중 날짜 방어
+  const sn=snapModDate(MOD.mdate); if(sn!==MOD.mdate){ MOD.mdate=sn; }   // 저장된 세션·자동 채움 등 다른 경로로 들어온 월중 날짜 방어
   const md=parseYMD(MOD.mdate);
   const past=res.rows.filter(x=>x.as_of.getTime()<=md.getTime());
   const k=past.length;
@@ -3281,9 +3285,9 @@ function renderModify(){
   if(!(I.cy&&I.term>0&&I.payment>0)) return '<div class="note">먼저 계약정보를 입력하고 [계산 실행]을 누르세요.</div>';
   const M=modResult(I,RES);
   const intro=`<div class="note" style="margin:0 0 10px">리스개시 후 조건변경(리스료·기간·할인율)을 <b>변경유효일</b>에 반영합니다. 수정 할인율로 잔여 리스료를 재측정한 <b>리스부채 조정액을 사용권자산에 가감</b>(문단 44~46). 사용권자산이 0 미만이 되는 초과 감소분은 당기손익.</div>`;
-  // 변경 스케줄 업로드(자동 감지·프리필) + 변경사유 토글(할인율 취급 결정, §6)
+  // 변경 스케줄 업로드(자동 감지·채움) + 변경사유 토글(할인율 취급 결정, §6)
   const up=`<div style="display:flex;gap:8px;align-items:center;margin:0 0 8px;flex-wrap:wrap">`+
-    `<button class="ghost" style="margin:0" onclick="document.getElementById('modfile').click()">📄 변경 스케줄 업로드 → 자동 감지·프리필</button>`+
+    `<button class="ghost" style="margin:0" onclick="document.getElementById('modfile').click()">📄 변경 스케줄 업로드 → 자동 감지·채움</button>`+
     `<span style="font-size:11px;color:#888">열: 리스ID·회차·지급일·지급액 (+변경유효일·변경사유 선택). 원계약과 대조해 연장/사용료조정을 감지합니다.</span></div>`;
   const rsnSel=`<div class="row2" style="margin-bottom:8px">`+
     `<div><label style="margin-top:0">변경사유 <span style="color:#c00000">*</span> (할인율 취급 결정)</label>`+
@@ -3295,23 +3299,23 @@ function renderModify(){
   const rsnBtn=`<div style="display:flex;gap:8px;align-items:center;margin:0 0 8px;flex-wrap:wrap">`+
     `<button class="ghost" style="margin:0;background:#e2efda;color:#375623" onclick="modSaveForCarry()">✅ 재측정 확정 - 당기 결산 반영 + 차기 이월</button>`+
     (MODS[I.id]?`<span class="badge" style="background:#eef7f0;color:#177245;border:1px solid #b7dcc2">이월 저장됨(ROU ${won(modSavedRou(I))})</span> <button class="ghost" style="margin:0;padding:4px 8px;font-size:11px" onclick="modClearCarry('${(I.id||'').replace(/'/g,"")}')">저장 취소</button>`:'')+
-    `<span style="font-size:11px;color:#888">이 버튼을 눌러야 <b>최종 반영</b>됩니다 - ① [결산 분개장]에 재측정 수정분개 ② 요약에 재측정 전후 비교 ③ i02에서 변경일 이후 금액 자동 제외(이중계상 방지) ④ 좌측 [차기 결산 i01 생성(이월)]의 재기준 행.</span></div>`;
+    `<span style="font-size:11px;color:#888" title="결산 분개장의 재측정 수정분개, 요약의 재측정 전후 비교, 변경일 이후 실제 납부 금액 자동 제외(이중계상 방지), 차기 결산 i01의 이월 행에 모두 쓰입니다">이 버튼을 눌러야 <b>최종 반영</b>됩니다.</span></div>`;
   const rsn=rsnSel+rsnBtn;
   let det='';
   if(MOD.detected){ const d=MOD.detected; const tl={A:'기간 연장',B:'사용료 조정','혼합':'혼합(연장+금액)'}[d.type]||d.type;
-    det=`<div class="note" style="background:#eef2f7;border-left:3px solid var(--navy);margin:0 0 8px"><b>자동 감지</b> · 유형 <b>${tl}</b> · 변경유효일 ${MOD.mdate} · 변경후 지급 ${d.n}회 ${d.uniform?'(정액)':'(비정액 벡터)'} · 잔여 ${MOD.remMonths}개월. <span style="color:#888">${MODS[I.id]?'확정 저장값입니다. 고치면 [재측정 확정]을 다시 눌러야 반영됩니다.':'프리필 값이며, 아래에서 확인·수정 후 확정하세요.'}</span></div>`; }
+    det=`<div class="note" style="background:#eef2f7;border-left:3px solid var(--navy);margin:0 0 8px"><b>자동 감지</b> · 유형 <b>${tl}</b> · 변경유효일 ${MOD.mdate} · 변경후 지급 ${d.n}회 ${d.uniform?'(정액)':'(회차별 금액)'} · 잔여 ${MOD.remMonths}개월. <span style="color:#888">${MODS[I.id]?'확정 저장값입니다. 고치면 [재측정 확정]을 다시 눌러야 반영됩니다.':'자동으로 채운 값이며, 아래에서 확인·수정 후 확정하세요.'}</span></div>`; }
   const rateUnconfirmed=(MOD.reason==='renego' && !MOD.rateConfirmed);
   let warn='';
   if(rateUnconfirmed){ warn=`<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;margin:0 0 8px"><b>⚠ 수정 할인율 확인 필요</b> - 재협상(계약조건 변경=리스변경, 문단 45)은 <b>변경일의 증분차입이자율 등 수정 할인율</b>을 적용해야 합니다. 현재 표시값 <b>${MOD.newRate}%</b>는 최초율입니다. 값을 수정하거나 그대로 사용함을 확인한 뒤 <b>[✔ 수정 할인율 확정]</b>을 누르세요. <b>확정 전 아래 재측정 결과는 잠정치</b>입니다.</div>`; }
   let vec='';
   if(MOD.newPmts && MOD.newPmts.length && !MOD.newPmts.every(v=>Math.round(v)===Math.round(MOD.newPmts[0]))){
-    vec=`<div class="note" style="margin:0 0 8px"><b>변경후 지급 벡터</b>(${MOD.newPmts.length}회): ${MOD.newPmts.map(v=>won(v)).join(', ')} <span style="color:#888">- 회차별 금액이 상이합니다. 아래 '변경후 정기리스료' 칸을 직접 수정하면 정액으로 전환됩니다.</span></div>`;
+    vec=`<div class="note" style="margin:0 0 8px"><b>변경후 회차별 지급액</b>(${MOD.newPmts.length}회): ${MOD.newPmts.map(v=>won(v)).join(', ')} <span style="color:#888">- 회차별 금액이 상이합니다. 아래 '변경후 정기리스료' 칸을 직접 수정하면 정액으로 전환됩니다.</span></div>`;
   }
   let snap='';
   if(MOD.mdateRaw){ const fm=addMonths(parseYMD(MOD.mdate),1), pr=prorateOn(), f=pr?eventFrac(parseYMD(MOD.mdateRaw)):1;
     snap=pr
       ? `<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;margin:0 0 8px"><b>변경유효일 ${MOD.mdateRaw} - 변경월을 일할 안분합니다</b> - 스케줄 기준일은 <b>${MOD.mdate}</b>(당월말)이고, 변경월은 <b>경과 ${R(f*1000)/10}%는 변경 전 조건 · 나머지는 변경 후 조건</b>으로 이자·감가를 나눠 인식합니다. 잔여기간은 ${MOD.remMonths}개월로 맞췄으니 확인하세요.</div>`
-      : `<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;margin:0 0 8px"><b>변경유효일을 월말로 조정했습니다</b> - 입력 <b>${MOD.mdateRaw}</b> → 적용 <b>${MOD.mdate}</b>. 이 계산기는 월말 스케줄 기준이라 월중 날짜를 그대로 두면 변경월이 스케줄에서 빠집니다. 개시일과 같은 규칙(15일 이하=전월말, 16일 이상=당월말)이며 <b>${fm.getFullYear()}년 ${fm.getMonth()+1}월분부터</b> 변경후 조건이 적용됩니다. 좌측 <b>[월중 이벤트 일할 안분]</b>을 켜면 변경월을 경과일수로 나눠 인식합니다(M-3).</div>`; }
+      : `<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;margin:0 0 8px"><b>변경유효일을 월말로 조정했습니다</b> - 입력 <b>${MOD.mdateRaw}</b> → 적용 <b>${MOD.mdate}</b>. 이 계산기는 월말 스케줄 기준이라 월중 날짜를 그대로 두면 변경월이 스케줄에서 빠집니다. 개시일과 같은 규칙(15일 이하=전월말, 16일 이상=당월말)이며 <b>${fm.getFullYear()}년 ${fm.getMonth()+1}월분부터</b> 변경후 조건이 적용됩니다. 좌측 <b>[월중 이벤트 일할 안분]</b>을 켜면 변경월을 경과일수로 나눠 인식합니다.</div>`; }
   const fields=`<div class="row2" style="margin-bottom:4px">`+
     `<div><label style="margin-top:0">변경유효일</label><span class="datew"><input class="dm" type="text" inputmode="numeric" maxlength="10" value="${MOD.mdate}" onchange="modEdit('mdate',this.value)"><input type="date" class="dmpick" tabindex="-1" value="${MOD.mdate}" aria-label="달력에서 변경유효일 선택"></span></div>`+
     `<div><label style="margin-top:0">수정 할인율(%)</label><input type="number" step="0.01" value="${MOD.newRate}" onchange="modEdit('newRate',this.value)"></div></div>`+
@@ -3323,9 +3327,9 @@ function renderModify(){
   if(!MODS[I.id]&&!MOD.detected&&!MOD.touched){
     const manual=`<div class="note" style="margin:0 0 8px">아래 값은 입력을 돕는 초기값입니다(개시 12개월 뒤, 계약 조건 그대로). 값을 고치면 재측정 결과가 나타납니다.</div>`+rsnSel+fields;
     const sumSt=`cursor:pointer;font-weight:700;color:var(--navy);font-size:13px;padding:6px 0`;
-    if(cl0&&cl0.remeasure) return `<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;margin:0 0 10px;font-size:13px"><b>■ 재측정 대상입니다</b> 판정: <b>${cl0.type}</b>. 실제 납부(i02)에서 앞으로 낼 리스료·회차가 바뀌었습니다. i02 값을 먼저 채운 뒤 변경유효일과 할인율을 확인해 확정하세요. `+
-        `<button class="ghost" style="margin:0 0 0 6px;width:auto;padding:5px 10px;font-size:12px" onclick="i02ToMod('${String(I.id||'').replace(/'/g,"\\'")}')">▶ i02 값으로 채우기</button></div>`+
-        `<details style="margin:10px 0"><summary style="${sumSt}">i02 값 없이 직접 입력</summary>`+intro+up+manual+`</details>`;
+    if(cl0&&cl0.remeasure) return `<div class="note" style="background:var(--amber);border:1px solid #e0c060;color:#7a5b00;margin:0 0 10px;font-size:13px"><b>■ 재측정 대상입니다</b> 판정: <b>${cl0.type}</b>. 실제 납부에서 앞으로 낼 리스료·회차가 바뀌었습니다. i02 값을 먼저 채운 뒤 변경유효일과 할인율을 확인해 확정하세요. `+
+        `<button class="ghost" style="margin:0 0 0 6px;width:auto;padding:5px 10px;font-size:12px" onclick="i02ToMod('${String(I.id||'').replace(/'/g,"\\'")}')">▶ 실제 납부 값으로 채우기</button></div>`+
+        `<details style="margin:10px 0"><summary style="${sumSt}">실제 납부 값 없이 직접 입력</summary>`+intro+up+manual+`</details>`;
     const why=cl0?`납부차이 판정: <b>${cl0.type}</b>.`:`실제 납부(i02) 자료가 없습니다.`;
     const over=(cl0&&cl0.type==='초과납')?` 결산일까지의 증액 납부만 적혀 있으면 초과납으로 판정됩니다. 리스료가 실제로 올랐다면 앞으로 낼 회차까지 i02에 적거나 아래에서 입력하세요.`:'';
     return `<div class="note" style="background:#eef7f0;border:1px solid #b7dcc2;color:#177245;margin:0 0 10px;font-size:13px"><b>■ 납부 자료상 재측정 대상이 보이지 않습니다</b> ${why}${over} 리스료·기간·할인율이 실제로 바뀐 경우에만 아래에서 입력하세요.</div>`+
@@ -3355,7 +3359,7 @@ function renderModify(){
   const sched=`<div class="note" style="margin-top:12px"><b>변경후 상각표</b> (재측정 시점 이후 · 잔여 ${MOD.remMonths}개월, 지급 ${M.nP}회)</div><div class="tblbox"><table>${sh}</table></div>`;
   const prov=rateUnconfirmed?`<div class="note" style="color:#c00000;font-weight:600;margin:10px 0 0">※ 잠정치 - 재협상(리스변경)의 수정 할인율이 미확정 상태입니다. 위 [✔ 수정 할인율 확정] 후 확정치로 표시됩니다.</div>`:'';
   return intro+up+rsn+det+fields+snap+vec+warn+sum+jr+sched+prov+
-    `<div class="note" style="margin-top:8px">근거: 제1116호 문단 44~46(리스변경 재측정). 조정액 = 변경후 리스부채 − 변경일 현재 리스부채 장부금액. 재측정은 월말 간주(월할) 기준으로 산출됩니다.</div>`;
+    `<div class="note" style="margin-top:8px">근거: 제1116호 문단 44~46(리스변경 재측정). 조정액 = 변경후 리스부채 − 변경일 현재 리스부채 장부금액. 재측정은 월말 기준(월할) 기준으로 산출됩니다.</div>`;
 }
 
 let RES=null, JE=null, TAB='liab', VIEW='single';
@@ -3382,32 +3386,34 @@ function calc(){
   let capDep=0,capInt=0;
   RES.rows.forEach(x=>{ const cap=(co===null)||(x.t<=co); if(cap&&I.capDep)capDep+=x.dep; if(cap&&I.capInt)capInt+=x.intr; });
   const stats=[
-    ['리스부채(최초)',won(RES.liability),0],
-    ['사용권자산 원가',won(RES.rou),0],
-    ['보증금 현재가치',won(RES.depPV)+' <span style="font-size:11px;color:#888">/현할차 '+won(RES.depDiff)+'</span>',0],
-    ['총이자비용',won(RES.totInt),0],
-    ['총감가상각비',won(RES.totDep),0],
-    ['보증금 총이자수익',won(RES.totInc),0],
+    ['리스부채(개시일)',won(RES.liability),0],
+    ['사용권자산(개시일)',won(RES.rou),0],
+    ['전체 기간 이자비용',won(RES.totInt),0],
+    ['전체 기간 감가상각비',won(RES.totDep),0],
   ];
+  if(I.depFace||Math.abs(RES.depPV)>=1){   // 보증금이 있을 때만 표시
+    stats.splice(2,0,['보증금 현재가치',won(RES.depPV)+' <span style="font-size:11px;color:#888">/할인차금 '+won(RES.depDiff)+'</span>',0]);
+    stats.push(['보증금 전체 기간 이자수익',won(RES.totInc),0]);
+  }
   if(I.capDep||I.capInt){  // 자본화 옵션 선택 시에만 표시
-    stats.push(['건중 자본화 합계',won(capDep+capInt),1]);
+    stats.push(['건설중인자산 자본화 합계',won(capDep+capInt),1]);
     stats.push(['└ 감가상각 / 이자',won(capDep)+' / '+won(capInt),1]);
   }
   const sc=document.getElementById('stats'); sc.className='cards dense';
   TOPSTATS=stats;   // 총괄↔단건 전환 시 재사용
   sc.innerHTML=stats.map(s=>
     `<div class="stat sm ${s[2]?'hl':''}" title="${s[0]}"><div class="k">${s[0]}</div><div class="v">${s[1]}</div></div>`).join('');
-  const tabs=[['liab','리스부채 상각표'],['rou','사용권자산 상각표'],['dep','보증금 유효이자'],['je','결산 분개장'],['verify','검증(수식↔일할)'],['pdiff','납부차이(선납/지연)'],['modify','리스변경(재측정)']];
+  const tabs=[['liab','리스부채 상각표'],['rou','사용권자산 상각표'],['dep','보증금 유효이자'],['je','결산 분개장'],['verify','검증(월말 기준↔실제 일수)'],['pdiff','납부차이(선납/지연)'],['modify','리스변경(재측정)']];
   document.getElementById('tabs').innerHTML=tabs.filter(t=>t[0]!=='dep'||I.depFace)
     .map(t=>`<div class="tab ${TAB===t[0]?'active':''}" data-tab="${t[0]}" onclick="setTab('${t[0]}')">${t[1]}</div>`).join('');
   render();
   const modeTxt = RES.mode==='daily'
-     ? `실제일 일할(ACT/365 유효) · 개시일 ${fmtD(RES.deemed)}(간주조정 없음)`
-     : `월말 간주개시일 ${fmtD(RES.deemed)}`;
+     ? `실제일 일할(연 365일) · 개시일 ${fmtD(RES.deemed)}(날짜 맞춤 없음)`
+     : `계산 개시일(월말) ${fmtD(RES.deemed)}`;
   sessionSave();
   document.getElementById('note').innerHTML=
     `${modeTxt} · 감가상각기간 ${RES.depm}개월 · 검증: 리스부채 기말 0, 사용권자산 기말 0, 최초부채+총이자−총지급=0. `+
-    ((I.capDep||I.capInt)?`건중 자본화 토글 시 분개의 감가상각비/이자비용 계정이 <span class="badge cip">건설중인자산</span>으로 대체됩니다(보증금 이자수익은 자본화 대상 아님).`:'');
+    ((I.capDep||I.capInt)?`건설중인자산 자본화 토글 시 분개의 감가상각비/이자비용 계정이 <span class="badge cip">건설중인자산</span>으로 대체됩니다(보증금 이자수익은 자본화 대상 아님).`:'');
 }
 
 // 탭 이동: TAB 갱신 + 청색(active) 표시 이동 + 패널 렌더 (기존엔 render만 호출돼 active가 안 따라옴)
@@ -3459,33 +3465,31 @@ function render(){
       :(SCHEDVIEW==='diff'?journalDiff(JE,journal(schedBefore(I))):JE));
     h=thead(['일자','적요','차변계정','차변','대변계정','대변']);
     const asofS=fmtD(asofT);
-    list.forEach(j=>{ const cip=String(j[2])==='건설중인자산'||/→건중/.test(j[1]);
+    list.forEach(j=>{ const cip=String(j[2])==='건설중인자산'||/→건설중인자산/.test(j[1]);
       h+=`<tr${String(j[0])>asofS?' class="aft"':''}><td class="l">${j[0]}</td><td class="l">${j[1]}</td><td class="l"${cip?' style="color:#7a5b00;font-weight:600"':''}>${j[2]}</td><td>${j[3]?won(j[3]):'-'}</td><td class="l">${j[4]}</td><td>${j[5]?won(j[5]):'-'}</td></tr>`; });
     let tg='';
     if(jdif){ const b=(v,t)=>`<button class="ghost" style="margin:0 6px 0 0;width:auto;padding:5px 11px;font-size:12px;${SCHEDVIEW===v?'background:var(--navy);color:#fff;border-color:var(--navy)':''}" onclick="setSchedView('${v}')">${t}</button>`;
       const kinds=schedKinds(I).filter(k=>k!=='리스변경(재측정)');
       tg=`<div class="note" style="margin:10px 0 6px;background:#eef7f0;border:1px solid #b7dcc2;color:#177245">`+
         `<div style="margin-bottom:6px"><b>■ ${kinds.join(' + ')} 반영됨</b> - 기본 분개장을 반영 전/후로 비교할 수 있습니다`+
-        (PMTS[I.id]?' (비정액 승격은 <b>개시일부터 소급</b>)':'')+`.</div>`+
+        (PMTS[I.id]?' (비정액 전환은 <b>개시일부터 소급</b>)':'')+`.</div>`+
         b('after','반영 후 (적용중)')+b('before','반영 전 (원계약)')+b('diff','차이')+
         (SCHEDVIEW==='diff'?`<div style="margin-top:7px;font-size:12px;color:#555">일자·계정별로 반영 후 − 반영 전을 상계해 <b>실제로 달라진 줄만</b> 남긴 것입니다(차변 +, 대변 −).</div>`:'')+
-        (MODS[I.id]?`<div style="margin-top:7px;font-size:12px;color:#7a5b00">재측정(리스변경)은 본문 스케줄을 바꾸지 않는 <b>조정 레이어</b>라 이 토글에 반응하지 않습니다 - 아래 <b>[재측정 수정분개]</b>를 보세요.</div>`:'')+
+        (MODS[I.id]?`<div style="margin-top:7px;font-size:12px;color:#7a5b00">재측정(리스변경)은 본문 스케줄을 바꾸지 않는 <b>별도 조정</b>라 이 토글에 반응하지 않습니다 - 아래 <b>[재측정 수정분개]</b>를 보세요.</div>`:'')+
         `</div>`; }
     h=modJEBox(I)+promoteJEBox(I)+tg+tabBasisNote(I,asofT,'je',h.includes('aft"'))+tbl(h);
-  } else if(TAB==='verify'){   // 검증(수식↔일할)
-    const V=analyzeVerify(RES.I, getAsof(RES.I));
+  } else if(TAB==='verify'){   // 검증(월말 기준↔실제 일수)
+    const V=analyzeVerify(RES.I, getAsof(RES.I)), base=Math.abs(V.items.find(x=>x[0]==='리스부채(최초)')[1])||0;
+    const over=t=>base>0&&Math.abs(t)/base>=VERIFY_TOL;
     let rows='';
     V.items.forEach(it=>{ const [name,g,f,dc,an]=it; const tot=g-f; const lab=causeLabel(dc,an);
-      const big=Math.abs(tot)>=100000;
       rows+=`<tr><td class="l">${name}</td><td>${won(g)}</td><td>${won(f)}</td>`+
-            `<td style="${big?'color:#c00000;font-weight:600':''}">${won(tot)}</td>`+
-            `<td>${won(dc)}</td><td>${won(an)}</td>`+
+            `<td style="${over(tot)?'color:#c00000;font-weight:600':''}">${won(Math.abs(tot)<0.5?0:tot)}</td>`+
+            `<td>${won(Math.abs(dc)<0.5?0:dc)}</td><td>${won(Math.abs(an)<0.5?0:an)}</td>`+
             `<td class="l" style="${lab!=='차이 없음'?'font-weight:600':'color:#888'}">${lab}</td></tr>`; });
-    h=`<div class="tblbox"><table>`+thead(['항목','간주(수식화)','FM(일할)','총차이','월할효과','개시일효과','주요원인'])+rows+`</table></div>`
-      +`<div class="note">결산일 ${fmtD(V.asof)} · 간주개시일 ${fmtD(V.deemed)} vs 실제개시일 ${fmtD(V.cdate)} · `
-      +`<b>총차이 = 간주 − FM = 월할효과 + 개시일효과</b> (telescoping). `
-      +`월할효과=같은 현금흐름을 월할→일할, 개시일효과=간주개시일·월말지급 → 실제개시일·실제지급일. `
-      +`결산일은 좌측 입력에서 변경 가능(공란=개시연도 말일).</div>`;
+    h=verifyVerdict(RES.I,V,base)+`<div class="tblbox"><table>`+thead(['항목','월말 기준','실제 일수 기준','차이','월할·일할 효과','날짜 맞춤 효과','주요 원인'])+rows+`</table></div>`
+      +`<div class="note"><b>월말 기준</b>: 개시일을 ${fmtD(V.deemed)}로 맞추고 지급도 월말로 보아 월할 계산합니다. <b>실제 일수 기준</b>: 실제 개시일 ${fmtD(V.cdate)}과 실제 지급일로 일할 계산합니다(연 365일). `
+      +`차이는 두 효과의 합입니다. 월할·일할 효과는 같은 현금흐름을 월 단위와 일 단위로 계산한 차이이고, 날짜 맞춤 효과는 개시일·지급일을 월말로 맞춘 차이입니다. 결산일 ${fmtD(V.asof)} 기준.</div>`;
   } else if(TAB==='pdiff'){   // 납부차이(선납/지연)
     h=renderPdiff();
   } else {   // 리스변경(재측정)
@@ -3552,10 +3556,10 @@ const MANUAL_HTML = `
 <tr><th>층</th><th>무엇</th><th>언제 쓰나</th></tr>
 <tr><td><b>i01</b> (계약 마스터)</td><td>리스 <b>개시</b> 조건(개시일·기간·리스료·할인율·보증금 등)</td><td>매 결산마다 업로드. 개시부터 다시 계산하는 <b>변하지 않는 기준</b></td></tr>
 <tr><td><b>i02</b> (실제 납부)</td><td>리스료의 <b>선납/지연</b>(실제 지급일·금액)</td><td>실제 납부가 계약과 다를 때. 결산 <b>조정사항</b>으로만 반영</td></tr>
-<tr><td><b>리스변경</b> (재측정)</td><td>계약조건 자체 변경 - <b>기간 연장/단축·리스료 증감·할인율 변경</b></td><td>변경유효일에 재측정. 다음 결산엔 <b>재기준(이월)</b>해서 i01에 반영</td></tr>
+<tr><td><b>리스변경</b> (재측정)</td><td>계약조건 자체 변경 - <b>기간 연장/단축·리스료 증감·할인율 변경</b></td><td>변경유효일에 재측정. 다음 결산엔 <b>이월(이월)</b>해서 i01에 반영</td></tr>
 </table>
 <div class="tip"><b>핵심 구분:</b> 단순히 <b>납부 시기</b>만 어긋난 것(선납/지연) → <b>i02</b>. 계약 <b>조건 자체</b>가 바뀐 것(연장·리스료 변경) → <b>리스변경</b>.</div>
-<div class="warn"><b>공시할 금액은 ★요약 맨 위 [✅ 최종 공시 금액] 표를 보세요.</b> 요약 24열 본문·결과엑셀 본문은 <b>계약상(i01) 기준</b>입니다 - 조정 전 금액이라 그대로 공시하면 안 됩니다. 최종 공시 금액 = <b>계약상 + i02 조정 + 재측정 조정</b>이며, 그 3층 합산표가 요약 화면 맨 위와 결과엑셀 <b>[최종(조정 후)] 시트</b>에 있습니다. 재무상태표 항목은 결산일 시점값, 손익 항목은 당기누적(YTD)입니다.</div>
+<div class="warn"><b>공시할 금액은 ★요약 맨 위 [✅ 최종 공시 금액] 표를 보세요.</b> 요약 24열 본문·결과엑셀 본문은 <b>계약상 기준</b>입니다 - 조정 전 금액이라 그대로 공시하면 안 됩니다. 최종 공시 금액 = <b>계약상 + 실제 납부 조정 + 재측정 조정</b>이며, 그 3층 합산표가 요약 화면 맨 위와 결과엑셀 <b>[최종(조정 후)] 시트</b>에 있습니다. 재무상태표 항목은 결산일 시점값, 손익 항목은 당기누적입니다.</div>
 
 <h3>3. 기본 사용법 (처음부터 끝까지)</h3>
 <div class="step"><b>① 양식 받기</b> - 화면 <b>상단 헤더 우측</b> [i01 계약정보 → ① 양식 다운로드]. 엑셀 양식이 받아집니다.</div>
@@ -3580,11 +3584,11 @@ const MANUAL_HTML = `
 <h4>결산 기준 설정 - 처음 한 번은 꼭 확인하세요</h4>
 <table><tr><th>설정</th><th>무엇</th><th>기본값</th></tr>
 <tr><td><b>결산일</b></td><td>재무상태표 기준일. 비우면 개시연도 말일</td><td>공란</td></tr>
-<tr><td><b>개시일 처리 방식</b></td><td>월말 간주(월할) = 기존 배치 수식화 방식 / 실제일 일할(ACT/365) = 정밀</td><td>월말 간주</td></tr>
-<tr><td><b>회계연도 개시월</b></td><td>당기누적(YTD) 손익 창의 기준. <b>12월 결산이면 1월</b>, 3월 결산이면 4월</td><td>1월</td></tr>
+<tr><td><b>개시일 처리 방식</b></td><td>월말 기준(월할) = 기존 배치 수식화 방식 / 실제일 일할(연 365일) = 정밀</td><td>월말 기준</td></tr>
+<tr><td><b>회계연도 개시월</b></td><td>당기누적 손익 창의 기준. <b>12월 결산이면 1월</b>, 3월 결산이면 4월</td><td>1월</td></tr>
 <tr><td><b>월중 이벤트 일할 안분</b></td><td>해지·축소·재측정이 <b>월중</b>일 때 그 달을 경과일수로 나눠 인식</td><td><b>꺼짐</b></td></tr></table>
 <div class="warn"><b>회계연도 개시월이 틀리면 '당기' 손익이 통째로 어긋납니다.</b> 3월 결산 법인이 1월(기본값)로 두면 요약·최종표의 당기 손익에 <b>직전 회계연도 1~3월이 섞여 들어갑니다</b>. 처음 한 번만 맞춰 두면 됩니다.</div>
-<div class="tip"><b>월중 이벤트 일할 안분(M-3)</b>은 켜면 기존 배치 수식화 워크페이퍼와 <b>숫자가 달라지므로</b> 기본이 꺼져 있습니다. 이벤트일이 월말이면 켜도 결과가 같으니, 월중 해지·축소·재측정이 실제로 있을 때 회사 방침을 정한 뒤 켜세요. 자세한 동작은 아래 각 절의 안내를 보세요.</div>
+<div class="tip"><b>월중 이벤트 일할 안분</b>은 켜면 기존 배치 수식화 워크페이퍼와 <b>숫자가 달라지므로</b> 기본이 꺼져 있습니다. 이벤트일이 월말이면 켜도 결과가 같으니, 월중 해지·축소·재측정이 실제로 있을 때 회사 방침을 정한 뒤 켜세요. 자세한 동작은 아래 각 절의 안내를 보세요.</div>
 <div class="tip"><b>개시일이 결산일 이후인 계약(미개시)은 잔액·손익을 0으로 잡습니다.</b> 아직 사용권을 넘겨받지 않았으므로 결산일 재무상태표·손익에 아무것도 올라가지 않습니다(종전에는 최초 리스부채 전액이 결산일 재무상태표에 잡혔습니다) - <b>차기 개시 예정 계약을 i01에 미리 적어 두어도 안전</b>하고, 개시월이 오면 자동으로 잡힙니다.</div>
 
 <h4>유동/비유동 분류 - 결산일 + 12개월 기준</h4>
@@ -3597,7 +3601,7 @@ const MANUAL_HTML = `
 <div class="tip">어느 경우든 <b>리스부채 합계는 변하지 않고 유동↔비유동 구분만</b> 달라집니다. 재분류한 금액은 <b>[✅ 최종 공시 금액] 표 아래</b>와 <b>[납부차이] 탭 전후비교</b>에 각주로 표시됩니다. 미달을 <b>감면</b>(사용권자산 차감·즉시손익)으로 처리하면 부채 자체가 소멸하므로 이 재분류는 해당하지 않습니다.</div>
 
 <h4>상단 결산정보 읽는 법</h4>
-<p>개별 계약, ★ 요약, ★ i02 반영 결과의 상단 카드는 같은 기준입니다. <b>큰 숫자는 계약상 + i02 조정 + 재측정 조정을 더한 금액</b>이고, 조정이 있는 칸에는 계약상 금액과 조정액이 작게 붙습니다. 손익은 당기(회계연도 개시~결산일) 금액입니다.</p>
+<p>개별 계약, ★ 요약, ★ 실제 납부 반영 결과의 상단 카드는 같은 기준입니다. <b>큰 숫자는 계약상 + 실제 납부 조정 + 재측정 조정을 더한 금액</b>이고, 조정이 있는 칸에는 계약상 금액과 조정액이 작게 붙습니다. 손익은 당기(회계연도 개시~결산일) 금액입니다.</p>
 <table><tr><th>제목 옆 표시</th><th>뜻</th></tr>
 <tr><td><b>최종 금액</b></td><td>도구에서 처리할 것이 남아 있지 않습니다. 규칙의 전제는 '이자 처리' 절을 보세요.</td></tr>
 <tr><td><b>⚠ 잠정 금액</b></td><td>재측정 미확정, 검토 필요 건, 재측정과 해지·축소의 겹침, 재측정 저장 뒤 계약 조건 변경 중 하나가 남아 있습니다. 처리하면 금액이 바뀔 수 있습니다.</td></tr>
@@ -3610,7 +3614,7 @@ const MANUAL_HTML = `
 <h4>산출물 - 결과 엑셀 · 분개장 CSV</h4>
 <table><tr><th>산출물</th><th>담기는 것</th></tr>
 <tr><td><b>결과 엑셀 [전제·가정]</b></td><td><b>맨 앞 시트.</b> 결산일·개시일 처리방식·월중 이벤트 안분 ON/OFF·회계연도 개시월·미달 처리모드·재측정 확정/미확정 목록·입력 검증 경고·도구 버전·생성일시가 담깁니다. <b>같은 i01·i02라도 이 설정이 다르면 금액이 달라지므로</b> 산출물과 함께 보관하세요</td></tr>
-<tr><td>[요약] · [최종(조정 후)]</td><td>계약상(i01) 기준 24열 요약 / <b>계약상 + i02 조정 + 재측정 조정</b>의 공시 금액</td></tr>
+<tr><td>[요약] · [최종(조정 후)]</td><td>계약상 기준 24열 요약 / <b>계약상 + 실제 납부 조정 + 재측정 조정</b>의 공시 금액</td></tr>
 <tr><td>계약별 시트 · <b>[분개장]</b></td><td>분개장에 <b>구분 열</b>(기본 / i02조정 / 재측정)이 붙어 <b>조정분개까지 한 시트</b>에 담깁니다 - 계약상 분개만으로는 최종 공시 부채와의 차이를 설명할 수 없기 때문입니다</td></tr>
 <tr><td><b>분개장 CSV</b></td><td><b>전 계약을 리스ID 열과 함께</b> 내보냅니다(종전에는 화면에서 고른 1건만 나갔습니다). 기본 분개 기준이므로, 조정분개까지 필요하면 결과 엑셀 [분개장]을 쓰세요</td></tr>
 </table>
@@ -3649,12 +3653,12 @@ const MANUAL_HTML = `
 <h4>회차마다 리스료가 다른 계약(비정액)</h4>
 <p>i01은 계약당 <b>정기리스료 한 칸</b>이라, 초기 몇 회만 단가가 다르거나 계절별로 금액이 다른 계약은 담기지 않습니다. 이런 계약은 두 가지 방법으로 처리합니다.</p>
 <ul>
-<li><b>i02에서 승격</b> - i02를 올리면 [납부차이] 탭 판별표의 '미달·초과납' 행에 버튼이 생깁니다.
-  <br><b>[단가만 승격]</b>(권장): 계약액보다 <b>적게 낸 회차의 금액만</b> 계약 단가로 반영합니다. <b>무납월(0원)·몰아내기(계약액 초과)는 지급 타이밍</b>으로 보아 제외하므로 i02가 계속 처리합니다.
-  <br><b>[전체 승격]</b>: i02 전 회차를 그대로 계약으로 굳힙니다. <b>무납월 0원까지 계약</b>이 되므로, 지급 스케줄 자체가 계약인 경우에만 쓰세요.</li>
+<li><b>i02에서 전환</b> - i02를 올리면 [납부차이] 탭 판별표의 '미달·초과납' 행에 버튼이 생깁니다.
+  <br><b>[단가만 전환]</b>(권장): 계약액보다 <b>적게 낸 회차의 금액만</b> 계약 단가로 반영합니다. <b>무납월(0원)·몰아내기(계약액 초과)는 지급 타이밍</b>으로 보아 제외하므로 i02가 계속 처리합니다.
+  <br><b>[전체 전환]</b>: i02 전 회차를 그대로 계약으로 굳힙니다. <b>무납월 0원까지 계약</b>이 되므로, 지급 스케줄 자체가 계약인 경우에만 쓰세요.</li>
 <li><b>i01의 '리스료스케줄' 시트</b>에 직접 적기 - i01 양식 두 번째 시트(리스ID·회차·지급액). 여기 적힌 회차만 그 금액으로, 나머지는 정기리스료가 적용됩니다.</li>
 </ul>
-<div class="tip">승격하면 리스부채·이자·사용권자산이 회차별 금액으로 다시 계산되고, <b>초과납·총액미달 판정이 사라집니다</b>(계약이 원래 그런 것이므로). 결산정보 패널에 <b>[비정액 계약]</b> 안내가 표시됩니다.</div>
+<div class="tip">전환하면 리스부채·이자·사용권자산이 회차별 금액으로 다시 계산되고, <b>초과납·총액미달 판정이 사라집니다</b>(계약이 원래 그런 것이므로). 결산정보 패널에 <b>[비정액 계약]</b> 안내가 표시됩니다.</div>
 <div class="warn"><b>차기 결산으로 이어가려면</b> [차기 결산 i01 생성]으로 내려받으세요 - 비정액 금액이 <b>'리스료스케줄' 시트</b>에 저장되어 다음 결산에 그대로 복원됩니다. 재측정 결과가 비정액인 경우도 이 시트로 정확히 이월됩니다(종전에는 단일 리스료로 근사).</div>
 
 <h4>i01 양식은 ①~⑦ 카테고리로 나뉩니다</h4>
@@ -3708,15 +3712,15 @@ const MANUAL_HTML = `
 <tr><td><b>혼합</b></td><td>연장 + 금액 변경이 함께 일어남</td><td><b>재측정</b> - 버튼으로 이동</td></tr>
 <tr><td><b>축소</b></td><td><b>쓰는 범위 자체가 줄어든</b> 경우(예: 5층 중 2층 반납)</td><td>i01 ⑦ 축소일·비율 → 문단 <b>46(a)</b> 비례감소</td></tr>
 <tr><td><b>해지</b></td><td>i01에 해지일이 들어간 계약</td><td>해지월까지 인식 후 잔여 제거(문단 46)</td></tr>
-<tr><td><b>비정액</b></td><td>회차별 금액이 원래 다른 계약이라고 지정</td><td>승격 - 그 금액이 계약 자체가 됨</td></tr>
+<tr><td><b>비정액</b></td><td>회차별 금액이 원래 다른 계약이라고 지정</td><td>전환 - 그 금액이 계약 자체가 됨</td></tr>
 <tr><td><b>차이없음</b></td><td>계약과 동일</td><td>없음</td></tr></table>
 <div class="warn"><b>감액(46(b))과 축소(46(a))는 다릅니다.</b> 리스료만 깎였으면 <b>감액</b>(재측정 → 조정액 전부 사용권자산), 쓰는 면적·대수가 줄었으면 <b>축소</b>(비례감소 + 차액 손익)입니다. i02 금액만으로는 구분할 수 없어 자동 판별은 <b>감액</b>으로 놓습니다 - 범위가 줄어든 것이라면 판별표의 <b>유형 드롭다운에서 [축소]로 바꾸고</b> 축소일·비율을 넣으세요.</div>
 <div class="tip"><b>축소와 감액이 함께 있으면 둘 다 처리합니다.</b> i01에 축소일·비율을 넣으면 계약 쪽이 이미 그만큼 줄어들므로, 그러고도 <b>남는 금액 차이</b>는 축소와 별개의 리스료 변동입니다. 이때 판정은 <b>축소로 덮이지 않고 감액·증액·연장 그대로 유지</b>되고, 근거란에 축소와 그 차이가 함께 표시되어 <b>재측정(46(b))으로도 이어집니다</b>. 축소만 있고 남는 차이가 없으면 판정은 <b>축소</b>입니다.</div>
-<div class="warn"><b>i02 회차가 계약 개시일보다 이전이면 무시하고 경고합니다.</b> 재측정 재기준으로 이월된 계약은 개시일이 <b>변경유효일</b>로 바뀌고 회차 번호도 1부터 다시 시작합니다. 여기에 원계약 회차 체계의 i02를 그대로 올리면 회차가 어긋나므로, 개시일 이전 지급 회차는 계산에서 빼고 근거란에 알립니다 - <b>이월된 계약은 i02도 새 회차 체계로 다시 만드세요.</b></div>
+<div class="warn"><b>i02 회차가 계약 개시일보다 이전이면 무시하고 경고합니다.</b> 재측정으로 이월된 계약은 개시일이 <b>변경유효일</b>로 바뀌고 회차 번호도 1부터 다시 시작합니다. 여기에 원계약 회차 체계의 i02를 그대로 올리면 회차가 어긋나므로, 개시일 이전 지급 회차는 계산에서 빼고 근거란에 알립니다 - <b>이월된 계약은 i02도 새 회차 체계로 다시 만드세요.</b></div>
 <div class="tip">마지막 지급 이후가 계속 무납이면 <b>중도해지 후보</b>로 안내합니다. 해지라면 i01 [해지일]에 적으시고, 단순 미지급이면 그대로 두세요 - <b>지급내역만으로는 구분할 수 없어 자동 확정하지 않습니다.</b></div>
 <div class="step"><b>증액·연장이 잡히면</b> ① 판별표의 <b>[▶ 재측정 탭에서 확정]</b> 클릭 → ② 변경유효일·변경후 리스료·잔여기간이 자동으로 채워집니다 → ③ <b>변경사유</b>(재협상 / 지수·요율)를 고르고 <b>수정 할인율을 확인·확정</b> → ④ <b>[✅ 재측정 확정]</b>까지 누르세요.</div>
-<div class="warn"><b>④까지 해야 이중계상이 없습니다.</b> 저장 전에는 그 증액분이 i02에서 '초과납'으로도 잡혀 사용권자산에 두 번 반영될 수 있습니다. 저장하면 그 리스의 <b>변경유효일 이후 구간은 i02 조정에서 자동 제외</b>(재측정·차기 i01 이월이 처리)되고, 판별표에 <b>[재측정 저장됨]</b> 배지가 붙습니다.</div>
-<div class="warn"><b>확정하지 않은 재측정이 있으면 [최종 공시 금액] 표는 최종이 아닙니다.</b> 재측정 대상으로 판별됐는데 아직 확정하지 않은 계약이 있으면, 요약 화면 <b>[✅ 최종 공시 금액] 표 위</b>와 결과엑셀 <b>[최종(조정 후)] 시트 맨 위</b>에 <b>⚠ 미확정 N건과 계약 ID 목록</b>이 뜹니다. 확정 전에는 재측정 레이어가 비어 있어 <b>연장 건은 부채가 0으로, 감액 건은 부호가 반대로</b> 잡히므로 그 표를 공시에 쓰면 안 됩니다. 목록에 적힌 계약을 위 ①~④ 절차로 확정한 뒤, <b>결과 엑셀도 다시 내려받으세요.</b></div>
+<div class="warn"><b>④까지 해야 이중계상이 없습니다.</b> 저장 전에는 그 증액분이 i02에서 '초과납'으로도 잡혀 사용권자산에 두 번 반영될 수 있습니다. 저장하면 그 리스의 <b>변경유효일 이후 구간은 실제 납부 조정에서 자동 제외</b>(재측정·차기 i01 이월이 처리)되고, 판별표에 <b>[재측정 저장됨]</b> 배지가 붙습니다.</div>
+<div class="warn"><b>확정하지 않은 재측정이 있으면 [최종 공시 금액] 표는 최종이 아닙니다.</b> 재측정 대상으로 판별됐는데 아직 확정하지 않은 계약이 있으면, 요약 화면 <b>[✅ 최종 공시 금액] 표 위</b>와 결과엑셀 <b>[최종(조정 후)] 시트 맨 위</b>에 <b>⚠ 미확정 N건과 계약 ID 목록</b>이 뜹니다. 확정 전에는 재측정 조정이 비어 있어 <b>연장 건은 부채가 0으로, 감액 건은 부호가 반대로</b> 잡히므로 그 표를 공시에 쓰면 안 됩니다. 목록에 적힌 계약을 위 ①~④ 절차로 확정한 뒤, <b>결과 엑셀도 다시 내려받으세요.</b></div>
 <p class="note">변경유효일·할인율은 <b>절대 자동 확정하지 않습니다</b> - 기준서상 판단이 필요한 부분이라 반드시 확인하셔야 합니다. 파일에 <b>변경유효일·변경사유</b> 열이 있는 별도 '변경 스케줄' 파일을 쓰는 기존 방식([리스변경] 탭 업로드)도 그대로 사용할 수 있습니다.</p>
 
 <h4>이자 처리 - 계약 할인율 유지</h4>
@@ -3744,7 +3748,7 @@ const MANUAL_HTML = `
 <ul>
 <li><b>기본(안분 꺼짐)</b>: 개시일과 같은 규칙 - <b>15일 이하는 전월말, 16일 이상은 당월말</b>. 이 규칙은 하루 차이로 변경월이 통째로 반대편에 붙으므로 금액이 크게 튈 수 있습니다.</li>
 <li><b>[월중 이벤트 일할 안분]을 켜면</b>: 15일 규칙을 쓰지 않고 <b>항상 당월말</b>로 맞춘 뒤, 변경월 이자·감가를 <b>경과분은 변경 전 조건 · 나머지는 변경 후 조건</b>으로 나눠 인식합니다. 변경일을 하루씩 옮겨도 금액이 <b>연속적으로</b> 변합니다.</li>
-<li><b>변경유효일을 고치면 잔여기간도 함께 조정됩니다</b> - 프리필 값이 그대로 남아 변경 후 스케줄이 계약 종료월과 어긋나지 않도록. 조정된 잔여기간은 배너에 표시되니 확인하세요.</li>
+<li><b>변경유효일을 고치면 잔여기간도 함께 조정됩니다</b> - 자동 채움 값이 그대로 남아 변경 후 스케줄이 계약 종료월과 어긋나지 않도록. 조정된 잔여기간은 배너에 표시되니 확인하세요.</li>
 </ul>
 <div class="tip"><b>별도 리스 vs 재측정:</b> 범위가 늘고 그 대가가 <b>독립적인 시장가격</b>이면 '별도 리스'(문단 44)라 재측정이 아니라 <b>i01에 새 줄로 추가</b>하면 됩니다. 그 외 대부분의 재협상·연장·요율변경은 재측정(이 탭)입니다. 이 판단은 사용자 책임입니다.</div>
 
@@ -3752,21 +3756,21 @@ const MANUAL_HTML = `
 <p>리스변경이 있었던 리스는 <b>다음 결산</b>에서 재측정 결과가 이어져야 합니다. 그런데 사용권자산은 <b>순장부금액으로 리셋되어 상각</b>되는데(문단 44~46), 이 값은 과거 상각 이력에 달린 <b>경로종속 값</b>이라 i01이 지급액만으로 다시 만들 수 없습니다. 그래서 <b>사용권자산 순장부 한 값만</b> 이월합니다.</p>
 <h4>방법</h4>
 <div class="step"><b>① 확정</b> - 변경한 리스를 [리스변경] 탭에서 재측정한 뒤 <b>[✅ 재측정 확정 - 당기 결산 반영 + 차기 이월]</b>. 이 버튼을 눌러야 결산 분개장·요약에 반영되고 i02 이중계상도 막힙니다.</div>
-<div class="step"><b>② 생성</b> - 결산 마무리 시 좌측 <b>[📤 차기 결산 i01 생성(이월)]</b>. 변경 리스는 <b>재기준 행</b>(리스개시일=변경유효일·수정 조건·<b>이월 사용권자산</b> 자동 채움), 나머지는 그대로 담긴 i01이 만들어집니다.</div>
+<div class="step"><b>② 생성</b> - 결산 마무리 시 상단 <b>[📤 차기 결산 i01 생성]</b>. 변경 리스는 <b>이월 행</b>(리스개시일=변경유효일·수정 조건·<b>이월 사용권자산</b> 자동 채움), 나머지는 그대로 담긴 i01이 만들어집니다.</div>
 <div class="step"><b>③ 다음 결산</b> - 이 i01을 그대로 업로드하면 변경이 요약·상각표·결과엑셀 본문에 자연스럽게 반영됩니다.</div>
 <div class="tip">i02(선납/지연)는 i01에 녹이지 않고 <b>계속 별도로 재업로드</b>합니다(전기/당기 자동 차분). 이월하는 건 <b>리스변경뿐</b>입니다.</div>
 <h4>결산 마무리 - 3종을 함께 보관하세요</h4>
 <table><tr><th>파일</th><th>왜 필요한가</th></tr>
-<tr><td><b>① 차기 결산 i01(이월)</b></td><td>다음 결산의 계약 마스터. 재기준 행·중도해지 제외가 반영돼 있습니다</td></tr>
+<tr><td><b>① 차기 결산 i01(이월)</b></td><td>다음 결산의 계약 마스터. 이월 행·중도해지 제외가 반영돼 있습니다</td></tr>
 <tr><td><b>② i02 반영본</b></td><td><b>i02 누적 조정은 i01에 담기지 않습니다.</b> 선납/지연·초과납 조정은 i02를 다시 올려야 이어집니다 - 빠뜨리면 그만큼 기초 잔액이 어긋납니다</td></tr>
 <tr><td><b>③ 작업상태(.json)</b></td><td>재측정 확정·미달 처리 선택·유형 지정 등 <b>사용자가 내린 판단</b>을 그대로 복원합니다</td></tr>
 </table>
-<div class="tip">①②만 있어도 잔액은 이어집니다 - 재기준으로 개시일이 바뀐 계약에서 <b>개시일 이전 i02 회차는 자동으로 무시</b>하기 때문입니다. 다만 ③이 없으면 재측정 확정 여부·미달 처리 선택을 <b>다시 골라야</b> 하므로 셋 다 보관하시는 편이 안전합니다.</div>
+<div class="tip">①②만 있어도 잔액은 이어집니다 - 이월 행으로 개시일이 바뀐 계약에서 <b>개시일 이전 i02 회차는 자동으로 무시</b>하기 때문입니다. 다만 ③이 없으면 재측정 확정 여부·미달 처리 선택을 <b>다시 골라야</b> 하므로 셋 다 보관하시는 편이 안전합니다.</div>
 
 <h3>7. 보증금 처리</h3>
 <ul>
 <li><b>변동 없음</b>(가장 흔함): 차기 i01 생성 시 반환월수를 <b>잔여로 자동 조정</b>해 보증금 장부가 정확히 이어집니다. 손대지 않아도 됩니다.</li>
-<li><b>금액 증액</b>(계약 갱신 등으로 기중 상향): i01의 <b>'보증금변동' 시트</b>에 <b>리스ID·변동일·변동액</b>을 적으세요. 변동월 말일에 인식해 <b>추가 납입액을 반환월까지 남은 기간으로 할인</b>한 금액이 보증금(금융자산)에 더해지고, 액면과의 차액(현할차)은 <b>선급리스료 성격이라 그 시점 사용권자산에 가산</b>돼 잔여 상각기간에 나눠 상각됩니다. <b>개시일로 소급하지 않으므로 전기 숫자가 바뀌지 않습니다.</b><br><span style="color:#c00000">④ 보증금 액면 칸을 직접 고치면 개시일부터 소급되어 전기가 틀어집니다 - 기중 변동은 반드시 이 시트를 쓰세요.</span></li>
+<li><b>금액 증액</b>(계약 갱신 등으로 기중 상향): i01의 <b>'보증금변동' 시트</b>에 <b>리스ID·변동일·변동액</b>을 적으세요. 변동월 말일에 인식해 <b>추가 납입액을 반환월까지 남은 기간으로 할인</b>한 금액이 보증금(금융자산)에 더해지고, 액면과의 차액(현재가치할인차금)은 <b>선급리스료 성격이라 그 시점 사용권자산에 가산</b>돼 잔여 상각기간에 나눠 상각됩니다. <b>개시일로 소급하지 않으므로 전기 숫자가 바뀌지 않습니다.</b><br><span style="color:#c00000">④ 보증금 액면 칸을 직접 고치면 개시일부터 소급되어 전기가 틀어집니다 - 기중 변동은 반드시 이 시트를 쓰세요.</span></li>
 <li><b>갱신으로 보증금과 리스료가 함께 오른 경우</b>: 보증금은 위 시트, <b>리스료는 리스변경(재측정)</b>이라 [납부차이] 탭에서 따로 확정합니다 - 성격이 다른 두 사건입니다.</li>
 <li><b>반환일 연장</b>(리스종료에 연동): <b>보증금 반환월수 칸</b>을 조정. (엄밀히는 IFRS 9상 예상시점 변경 손익(catch-up)이 생기며 이는 수기 반영.)</li>
 <li><b>감액/일부 반환</b>: 기중이면 '보증금변동' 시트에 <b>음수(−)</b>로, 다음 계약부터면 액면을 줄이거나 비움.</li>
@@ -3779,24 +3783,24 @@ const MANUAL_HTML = `
 <tr><td>리스 <b>기간 연장</b>(또는 단축)</td><td><b>리스변경 탭</b></td><td>변경 스케줄 업로드(자동감지) 또는 수기→사유·할인율 확정→💾저장→차기 i01 생성</td></tr>
 <tr><td>리스료 <b>증액/감액</b></td><td><b>리스변경 탭</b></td><td>위와 동일</td></tr>
 <tr><td>할인율만 변경</td><td><b>리스변경 탭</b></td><td>수정 할인율 입력·확정</td></tr>
-<tr><td>다음 결산 준비(변경 리스 이월)</td><td><b>차기 i01 생성</b></td><td>💾 저장한 리스가 재기준 행으로 반영</td></tr>
+<tr><td>다음 결산 준비(변경 리스 이월)</td><td><b>차기 i01 생성</b></td><td>💾 저장한 리스가 이월 행으로 반영</td></tr>
 <tr><td>보증금 무변동</td><td>자동</td><td>할 것 없음</td></tr>
 <tr><td>보증금 금액·반환일 변동</td><td>차기 i01 수정</td><td>생성된 i01의 보증금 셀 수정</td></tr>
 <tr><td>[최종 공시 금액] 위에 <b>⚠ 미확정</b> 배지가 뜸</td><td><b>납부차이 탭</b></td><td>목록의 계약을 [▶ 재측정 탭에서 확정] → [✅ 재측정 확정]까지</td></tr>
 <tr><td>결산일 이후에 개시되는 차기 계약</td><td><b>i01에 미리 입력</b></td><td>미개시 계약은 잔액·손익 0 - 미리 적어 두어도 안전</td></tr>
 <tr><td>분개장을 전 계약 한 파일로</td><td><b>분개장 CSV</b> / 결과엑셀 [분개장]</td><td>CSV는 전 계약·리스ID 열, 결과엑셀은 [구분] 열로 조정분개까지</td></tr>
 <tr><td>무슨 설정으로 뽑은 숫자인지 확인</td><td><b>결과엑셀 [전제·가정]</b></td><td>맨 앞 시트 - 결산일·안분 ON/OFF·미확정 목록·도구 버전</td></tr>
-<tr><td>수식(월할)과 일할 차이 확인</td><td><b>검증 탭</b></td><td>간주 vs 일할 항목별 차이·원인 표시</td></tr>
+<tr><td>수식(월할)과 일할 차이 확인</td><td><b>검증 탭</b></td><td>월말 기준과 실제 일수 기준의 차이·판정·원인 표시</td></tr>
 </table>
 
 <h3>9. 검증 포인트 · 한계</h3>
 <ul>
 <li><b>자동 검증</b>: 리스부채 기말=0, 사용권자산 기말=0, (최초부채 + 총이자 − 총지급)=0. [검증] 탭에서 월할↔일할 차이도 확인.</li>
 <li><b>i02</b>는 리스료 타이밍 전용(보증금 미포함).</li>
-<li><b>재측정 이월</b>: 변경 후 지급이 회차별로 다른(비정액) 경우 i01 단일 리스료로는 근사되어 경고가 뜹니다(수기 확인). 재기준 시 감가상각누계는 0부터 다시 시작합니다(순장부·손익은 정확, 주석의 취득원가/상각누계 총액 표기만 유의).</li>
+<li><b>재측정 이월</b>: 변경 후 지급이 회차별로 다른(비정액) 경우 i01 단일 리스료로는 근사되어 경고가 뜹니다(수기 확인). 이월 시 감가상각누계는 0부터 다시 시작합니다(순장부·손익은 정확, 주석의 취득원가/상각누계 총액 표기만 유의).</li>
 <li><b>공시 금액은 [✅ 최종 공시 금액] 표</b>에서 확인하세요. 요약 24열 본문·결과엑셀 본문은 계약상 기준(조정 전)입니다.</li>
-<li><b>월중 이벤트 안분(M-3)은 월 단위 스케줄 위의 근사</b>입니다. 잔여기간이 정수 월이라, 변경일이 월초일 때 전월말 재측정과 완전히 일치하지는 않습니다. 그 달의 손익 배분은 정확해집니다.</li>
-<li><b>유동/비유동은 결산일+12개월 기준</b>으로 나눕니다(3절). 본문은 <b>월말 스케줄</b>, i02 조정분은 <b>실제일(ACT/365)</b> 기준이라 구분 경계에서 근사가 섞입니다 - <b>부채 합계에는 영향이 없습니다.</b></li>
+<li><b>월중 이벤트 안분은 월 단위 스케줄 위의 근사</b>입니다. 잔여기간이 정수 월이라, 변경일이 월초일 때 전월말 재측정과 완전히 일치하지는 않습니다. 그 달의 손익 배분은 정확해집니다.</li>
+<li><b>유동/비유동은 결산일+12개월 기준</b>으로 나눕니다(3절). 본문은 <b>월말 스케줄</b>, 실제 납부 조정분은 <b>실제일(연 365일)</b> 기준이라 구분 경계에서 근사가 섞입니다 - <b>부채 합계에는 영향이 없습니다.</b></li>
 <li><b>복구충당부채 계정이 없습니다</b> - 복구원가추정치는 사용권자산에만 얹히므로, 해지 시 충당부채 환입은 수기 처리하고 도구는 금액만 경고합니다.</li>
 <li><b>전기 귀속 조정</b>: i02 누적 조정 중 직전 회계연도까지의 분은 전기 재무제표에 이미 반영됐다고 보고 당기 손익에서 제외합니다. 전기 재무제표가 조정 전 금액으로 공시됐다면 <b>소급재작성 또는 중요성 판단 후 당기 인식</b>이 필요하니 [결산 분개장]의 전기 수정분개를 확인하세요.</li>
 <li><b>작업상태 호환</b>: 저장 파일에 버전이 붙습니다. <b>더 최신 버전으로 저장한 상태를 구 배포본에서 열면 중단</b>하고 알립니다(항목이 조용히 사라져 금액이 달라지는 것을 막기 위함).</li>
